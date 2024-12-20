@@ -247,6 +247,9 @@ def cosine_beta_schedule(timesteps, s = 0.008):
     betas = 1 - (alphas_cumprod[1:] / alphas_cumprod[:-1])
     return torch.clip(betas, 0, 0.999)
 
+def normalize_to_neg_one_to_one(x):
+    return x * 2.0 - 1.0
+
 class GaussianDiffusion(nn.Module):
     def __init__(
         self,

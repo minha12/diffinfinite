@@ -4,6 +4,7 @@ import pandas as pd
 from tqdm import tqdm
 import csv    
 import yaml
+import json
 
 import numpy as np
 import torch
@@ -106,10 +107,35 @@ def create_dataset_csv(data_path: str, threshold=0.3):
         writer.writerows(zip(imgs, labels))
 
 
+def create_dataset_csv_v2(data_path: str, threshold=0.3):
+    # Setup paths for images and masks subdirectories
+    img_path = Path(data_path) / 'images'
+    mask_path = Path(data_path) / 'masks'
+    
+    # Get all image files
+    img_files = [f for f in img_path.iterdir() if f.name.endswith('.png')]
+
+    imgs, labels = [], []
+    for f in img_files:
+        # Construct mask path for corresponding image
+        mask_file = mask_path / f
+        if mask_file.exists():
+            mask = np.array(Image.open(mask_file))
+            if np.mean(mask > 0) > threshold:
+                imgs.append(f.stem)
+                unique_labels = list(map(str, np.int32(np.unique(mask))))
+                labels.append(' '.join(unique_labels))
+
+    # Write the image names and labels to a CSV file
+    with open(Path(data_path, "dataset.csv"), 'w', newline='') as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerows(zip(imgs, labels))
+
+
 def remove_common_elements(train_set, test_set):
     # Convert train_set and test_set to sets to remove duplicates and enable set operations
     unique_train_set = set(train_set)
-    unique_test_set = set(test_set)
+    unique_test_set = set(unique_test_set)
 
     # Compute the unique elements in train_set that are not in test_set
     unique_elements = unique_train_set.difference(unique_test_set)
@@ -143,6 +169,17 @@ def get_class_counts(data_path: str = data_path):
 
     return counts
 
+def get_num_classes(data_path: str) -> int:
+    """Get number of unique classes from dataset CSV."""
+    unique_labels = set()
+    
+    with open(os.path.join(data_path, 'dataset.csv'), 'r') as file:
+        reader = csv.reader(file)
+        for _, labels in reader:
+            # Add all unique labels to set
+            unique_labels.update(map(int, labels.split()))
+    
+    return len(unique_labels)
 
 def get_class_names(data_path: str = data_path):
     # Open the YAML file
@@ -159,6 +196,12 @@ def get_class_names(data_path: str = data_path):
 
     return class_names[:-1]
 
+def get_class_names_json(json_path: str = './config/label_enum.json'):
+    with open(json_path, 'r') as f:
+        label_map = json.load(f)
+    # Sort by label index and return the names in order
+    sorted_labels = sorted(label_map.items(), key=lambda x: x[1])
+    return [name for name, _ in sorted_labels]
 
 def dataset_to_dict(data_path: str = data_path):
     # Get the list of class names present in the dataset
@@ -190,6 +233,25 @@ def dataset_to_dict(data_path: str = data_path):
                 subsets[label].append(img)
     return subsets
 
+def skin_dataset_to_dict(data_path: str = data_path):
+    # Get the number of classes
+    num_classes = get_num_classes(data_path)+1
+    # Create an empty dictionary for each class, to store the images belonging to that class
+    subsets = {i: [] for i in range(num_classes-1)}
+
+    # Read the dataset CSV file
+    with open(join(data_path, 'dataset.csv'), 'r') as file:
+        # Use a CSV reader to iterate over the rows of the file
+        reader = csv.reader(file)
+        for row in reader:
+            # Extract the image name and label string from the row
+            img, labels_str = row[0], row[1]
+            # Convert the label string to a list of integers
+            labels = [int(l) for l in labels_str.split()]
+            # Iterate over the labels of the image
+            for label in labels:
+                subsets[label].append(img)
+    return subsets
 
 def split_dataset(data_path: str = data_path, train_size: float = 0.9):
     """
@@ -228,6 +290,42 @@ def split_dataset(data_path: str = data_path, train_size: float = 0.9):
 
     return train_set, test_set
 
+def split_skin_dataset(data_path: str = data_path, train_size: float = 0.9):
+    """
+    Splits a dataset into training and test sets, with each set containing data for each class.
+    :param data_path: the path to the dataset
+    :param train_size: the proportion of the data to use for training
+    :return: two dictionaries, one containing the training data and the other containing the test data
+    """
+
+    # Create a dictionary that maps class names to their corresponding data
+    subset_dict = skin_dataset_to_dict(data_path)
+
+    # Determine the number of classes and create a list of subclasses
+    classes = get_class_names_json()
+    num_classes = len(classes)
+    subclasses = list(range(num_classes))
+
+    # Create empty dictionaries to hold the training and test data for each subclass
+    train_set, test_set = {}, {}
+    for i in subclasses:
+        train_set[i], test_set[i] = [], []
+
+    # Split the data for each class into training and test sets
+    for i in range(num_classes):
+        class_set = subset_dict[i]
+        class_counts = len(class_set)
+
+        if class_counts>1:
+            # Split the data using the specified train/test ratio
+            train_index, test_index = train_test_split(
+                                            torch.linspace(0, class_counts - 1, class_counts), 
+                                            train_size=train_size)
+            # Add the training and test data to the corresponding dictionary
+            train_set[i] += [class_set[j] for j in train_index.int()]
+            test_set[i] += [class_set[j] for j in test_index.int()]
+
+    return train_set, test_set
 
 def add_unconditional(data_path: str, data_dict: str, no_check=False):
     files = [f for f in Path(data_path).iterdir()]
@@ -281,7 +379,150 @@ def import_dataset(
 
     return train_loader, test_loader
 
+def import_skin_dataset(
+        data_path: str = data_path,
+        batch_size: int = 32,
+        num_workers: int = 0,
+        subclasses: list = None,
+        cond_drop_prob: float = 0.5,
+        threshold: float = 0.,
+        force: bool = False,
+        transform=None,
+        **kwargs
+):
+    # Generate the dataset CSV file if it does not exist
+    if not os.path.exists(join(data_path, "dataset.csv")) or force:
+        create_dataset_csv_v2(data_path=data_path, threshold=threshold)
 
+    train_dict, test_dict = split_skin_dataset(data_path, train_size=0.9)
+
+    # Create the train and test datasets
+    train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
+                            subclasses=subclasses, cond_drop_prob=cond_drop_prob,
+                            transform=transform)
+    test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
+                           subclasses=subclasses, cond_drop_prob=1.,
+                           transform=transform)
+
+    # Create the train and test data loaders
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+
+    return train_loader, test_loader
+
+class DatasetSkin(Dataset):
+    def __init__(self,
+            data_path: str,
+            data_dict: dict,
+            subclasses: list = None,
+            cond_drop_prob: float = 0.5,
+            extra_unknown_data_path: list = [],
+            transform = None):
+
+        if subclasses:
+            data_dict = self._subclasses(data_dict,subclasses)
+
+        for extra in extra_unknown_data_path:
+            data_dict = add_unconditional(data_path=extra, 
+                                          data_dict=data_dict, no_check=True)
+
+        N_classes = len(data_dict)
+
+        self.data_path = data_path
+        self.extra = extra_unknown_data_path
+        self.data_dict = data_dict
+        self.subclasses = subclasses
+        self.cutoffs = self._cutoffs(subclasses,cond_drop_prob)
+        self.N_classes = N_classes
+        self.transform = transform
+
+    def __repr__(self):
+        rep = f"{type(self).__name__}: ImageFolderDataset[{self.__len__()}]"
+        for n, in range(self.N_classes):
+            rep += f'\nClass {n} has N samples: {len(self.data_dict[n])}\t'
+        return rep
+
+    def __len__(self):
+        counts=0
+        for i in range(len(self.data_dict)):
+            counts+=len(self.data_dict[i])
+        return counts
+
+    def _subclasses(self, data_dict: dict, subclasses: list):
+        not_subclasses = []
+        for k in data_dict.keys():
+            if k not in subclasses and k != 0:
+                not_subclasses += data_dict[k]
+        data_dict = {(i+1): data_dict[k] for i, k in enumerate(subclasses)}
+        data_dict[len(subclasses)+1] = not_subclasses
+        data_dict[0]=[]
+        return data_dict
+
+    def _cutoffs(self, subclasses, cond_drop_prob=0.5):
+        probs=[cond_drop_prob/(len(subclasses)+1) for n in range(len(subclasses)+1)]
+        probs.insert(0,1.-cond_drop_prob)
+        return torch.Tensor(probs).cumsum(dim=0)
+
+    def multi_to_single_mask(self, mask):
+        mask=(mask*255).int()
+        if self.tmp_index==0:
+            mask=torch.zeros_like(mask)
+        elif self.tmp_index==len(self.subclasses)+1:
+            uniques=torch.unique(mask).int().tolist()
+            uniques=[unique for unique in uniques if unique not in self.subclasses]
+            if 0 in uniques:
+                uniques.remove(0)
+            for unique in uniques:
+                mask=torch.where(mask==unique, -1, mask)
+            mask=torch.where(mask!=-1, len(self.subclasses)+1, 0)
+        else:
+            mask=torch.where(mask==self.subclasses[self.tmp_index-1], self.tmp_index, 0)
+        return mask
+
+    def unbalanced_data(self):
+        # generate a random number in [0,1)
+        rand_num = torch.rand(1)
+        # find the index of the interval that the random number falls into
+        index = torch.sum(rand_num >= self.cutoffs)
+        self.tmp_index = index
+        # map the index to the appropriate tensor value using PyTorch indexing
+        oneclass_data = self.data_dict[index.item()]
+        # generate a random number in [0,1)
+        rand_num = (torch.rand(1)*len(oneclass_data)).int()
+        # extract random img from the selected class
+        core_path = oneclass_data[rand_num]
+        # return img and mask path
+        img_path = join(self.data_path, core_path+'.jpg')
+        mask_path = join(self.data_path, core_path+'_mask.png')
+
+        if not os.path.exists(img_path):
+            for extra in self.extra:
+                extra_path = join(extra, core_path+'.jpg')
+                if os.path.exists(extra_path):
+                    img_path = extra_path
+
+        # load img and mask
+        img = Image.open(img_path)
+        if os.path.exists(mask_path):
+            mask = Image.open(mask_path)
+        else:
+            h,w,c=np.array(img).shape
+            mask=np.zeros((h,w,1)) 
+
+        return img,mask
+
+
+    def __getitem__(self,idx):
+
+        img, mask = self.unbalanced_data()
+
+        if self.transform is not None:
+            img,mask = self.transform((img,mask))
+
+        mask = self.multi_to_single_mask(mask)
+
+        return img,mask
+    
 class DatasetLung(Dataset):
     def __init__(self,
             data_path: str,
