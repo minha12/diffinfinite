@@ -806,18 +806,19 @@ class Trainer(object):
             self.ema.update(unwrapped_model)
 
             if self.step != 0 and self.step % self.save_and_sample_every == 0:
-                # Move ema_model to correct device for sampling
-                self.ema.ema_model = self.ema.ema_model.to(device)
-                # Rest of eval_loop...
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
-                    test_images,test_masks=next(self.test_loader)
+                    test_images, test_masks = next(self.test_loader)
                     test_images = test_images[:, :3] if test_images.shape[1] > 3 else test_images
-                    z = self.vae.encode(
-                        test_images[:self.num_samples]).latent_dist.sample()/50
-                    z = self.ema.ema_model.sample(z,test_masks[:self.num_samples])*50
-                    test_samples=torch.clip(self.vae.module.decode(z).sample,0,1)
+                    # VAE operations
+                    z = self.vae.encode(test_images[:self.num_samples]).latent_dist.sample()/50
+                    z = self.ema.ema_model.sample(z, test_masks[:self.num_samples])*50
+                    # Fix VAE decode call - remove .module
+                    test_samples = torch.clip(self.vae.decode(z).sample, 0, 1)
                     
+                    # Save images...
+                    # ...existing code...
+
                 utils.save_image(test_images[:self.num_samples], 
                                  str(self.results_folder / f'images-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))   
