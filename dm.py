@@ -639,6 +639,22 @@ class EMAWrapper:
                 ema_param.data.copy_(ema_param.data.to(device).lerp(
                     model_param.data.to(device), 1. - self.beta
                 ))
+                
+    def state_dict(self):
+        """Return state dict for saving."""
+        return {
+            'ema_model': self.ema_model.state_dict(),
+            'beta': self.beta,
+            'update_every': self.update_every,
+            'update_count': self.update_count
+        }
+        
+    def load_state_dict(self, state_dict):
+        """Load from state dict."""
+        self.ema_model.load_state_dict(state_dict['ema_model'])
+        self.beta = state_dict['beta']
+        self.update_every = state_dict['update_every']
+        self.update_count = state_dict['update_count']
 
 # ...existing code...
 
@@ -750,7 +766,7 @@ class Trainer(object):
             'model': self.accelerator.get_state_dict(self.model),
             'opt': self.opt.state_dict(),
             'scheduler': self.scheduler.state_dict(),
-            'ema': self.accelerator.get_state_dict(self.ema),
+            'ema': self.ema.state_dict(),  # Use state_dict directly
             'scaler': self.accelerator.scaler.state_dict() if exists(self.accelerator.scaler) else None,
         }
 
