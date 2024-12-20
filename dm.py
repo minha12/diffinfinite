@@ -613,6 +613,24 @@ class GaussianDiffusion(nn.Module):
         img = normalize_to_neg_one_to_one(img)
         return self.p_losses(img, t, *args, **kwargs)
 
+class EMAWrapper:
+    def __init__(self, model, beta=0.9999, update_every=10):
+        self.ema_model = copy.deepcopy(model)
+        self.beta = beta
+        self.update_every = update_every
+        self.update_count = 0
+        
+    def update(self, model):
+        self.update_count += 1
+        if self.update_count % self.update_every != 0:
+            return
+            
+        with torch.no_grad():
+            for ema_param, model_param in zip(self.ema_model.parameters(), model.parameters()):
+                ema_param.data.lerp_(model_param.data, 1. - self.beta)
+
+# ...existing code...
+
 class Trainer(object):
     def __init__(
         self,
@@ -687,7 +705,9 @@ class Trainer(object):
 
         # for logging results in a folder periodically
 
-        self.ema = EMA(diffusion_model, beta = ema_decay, update_every = ema_update_every)
+        self.ema = EMAWrapper(diffusion_model, 
+                            beta=ema_decay, 
+                            update_every=ema_update_every)
 
         self.results_folder = Path(results_folder)
         self.results_folder.mkdir(parents=True, exist_ok=True)  # Add parents=True to create all directories
@@ -768,19 +788,17 @@ class Trainer(object):
     def eval_loop(self):
         
         if self.accelerator.is_main_process:
-            self.ema.to(self.accelerator.device)
-            self.ema.module.update()
+            unwrapped_model = self.accelerator.unwrap_model(self.model)
+            self.ema.update(unwrapped_model)
 
             if self.step != 0 and self.step % self.save_and_sample_every == 0:
-                self.ema.module.ema_model.eval()
-
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
                     test_images,test_masks=next(self.test_loader)
                     test_images = test_images[:, :3] if test_images.shape[1] > 3 else test_images
                     z = self.vae.encode(
                         test_images[:self.num_samples]).latent_dist.sample()/50
-                    z = self.ema.module.ema_model.sample(z,test_masks[:self.num_samples])*50
+                    z = self.ema.ema_model.sample(z,test_masks[:self.num_samples])*50
                     test_samples=torch.clip(self.vae.module.decode(z).sample,0,1)
                     
                 utils.save_image(test_images[:self.num_samples], 
