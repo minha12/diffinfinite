@@ -67,7 +67,7 @@ masktrainer = MaskTrainer(
 
 masktrainer.load(milestone)
 masktrainer.ema.cuda()
-masktrainer.ema=masktrainer.ema.eval()
+# masktrainer.ema=masktrainer.ema.eval()
 
 '''Images Model'''
 
@@ -109,18 +109,18 @@ trainer = Trainer(
 
 trainer.load(milestone)
 trainer.ema.cuda()
-trainer.ema=trainer.ema.eval()
+# trainer.ema=trainer.ema.eval()
 
 def main(
-        n_images=512,
-        batch_size=4,
+        n_images=1,
+        batch_size=1,
         label=1,
-        image_size=2048,
+        image_size=8192,
         cond_scale=3.0,
         sampling_steps=250,
-        imgs_path='./results/large'):
+        imgs_path='./results/xlarge'):
 
-    imgs_path=imgs_path+f'omega{cond_scale:.1f}/'
+    imgs_path=imgs_path+f'/omega{cond_scale:.1f}/'
     os.makedirs(imgs_path, exist_ok=True)
     
     with torch.no_grad():
@@ -143,7 +143,7 @@ def main(
                                 cond_scale=cond_scale)
 
 
-            zs,_ = random_sample_masks(masks.cuda())
+            zs = random_sample_masks(masks.cuda())
 
             masks=[]
             for z in zs:
@@ -155,7 +155,7 @@ def main(
                 masks.append(mask)
             masks=torch.cat(masks,0)
 
-            zs,_ = random_sample(masks.cuda())
+            zs = random_sample(masks.cuda())
 
             imgs=[]
             for z in zs:

@@ -65,7 +65,7 @@ masktrainer = MaskTrainer(
 
 masktrainer.load(milestone)
 masktrainer.ema.cuda()
-masktrainer.ema=masktrainer.ema.eval()
+# masktrainer.ema=masktrainer.ema.eval()
 
 '''Load Images Model'''
 
@@ -107,7 +107,7 @@ trainer = Trainer(
 
 trainer.load(milestone)
 trainer.ema.cuda()
-trainer.ema=trainer.ema.eval()
+# trainer.ema=trainer.ema.eval()
 
 @torch.no_grad()
 def sample(masks, cond_scale=3.0):
