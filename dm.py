@@ -179,9 +179,12 @@ class Unet(nn.Module):
         batch, device = x.shape[0], x.device
 
         # derive condition, with condition dropout for classifier free guidance        
-
-        masks=classes.clone()
-        classes=(torch.max(classes.reshape(classes.shape[0],-1),-1).values).int()
+        masks = classes.clone()
+        
+        # Get max class per batch and ensure within embedding range
+        classes = torch.max(classes.reshape(classes.shape[0], -1), -1).values
+        classes = torch.clamp(classes, min=0, max=self.classes_emb.num_embeddings-1).int()
+        
         classes_emb = self.classes_emb(classes)
         c = self.classes_mlp(classes_emb)
 

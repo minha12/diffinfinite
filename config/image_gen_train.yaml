@@ -1,7 +1,7 @@
 unet:
   image_size: 512
   dim: 256
-  num_classes: 10
+  num_classes: 64  # Increase this to cover all possible class indices
   dim_mults:
     - 1
     - 2
