@@ -620,14 +620,25 @@ class EMAWrapper:
         self.update_every = update_every
         self.update_count = 0
         
+    def to(self, device):
+        self.ema_model.to(device)
+        return self
+        
     def update(self, model):
         self.update_count += 1
         if self.update_count % self.update_every != 0:
             return
+        
+        # Ensure same device
+        device = next(model.parameters()).device
+        self.ema_model.to(device)
             
         with torch.no_grad():
             for ema_param, model_param in zip(self.ema_model.parameters(), model.parameters()):
-                ema_param.data.lerp_(model_param.data, 1. - self.beta)
+                # Ensure params are on same device before lerp
+                ema_param.data.copy_(ema_param.data.to(device).lerp(
+                    model_param.data.to(device), 1. - self.beta
+                ))
 
 # ...existing code...
 
@@ -788,10 +799,16 @@ class Trainer(object):
     def eval_loop(self):
         
         if self.accelerator.is_main_process:
+            # Move model and EMA to same device
+            device = next(self.model.parameters()).device
             unwrapped_model = self.accelerator.unwrap_model(self.model)
+            self.ema = self.ema.to(device)
             self.ema.update(unwrapped_model)
 
             if self.step != 0 and self.step % self.save_and_sample_every == 0:
+                # Move ema_model to correct device for sampling
+                self.ema.ema_model = self.ema.ema_model.to(device)
+                # Rest of eval_loop...
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
                     test_images,test_masks=next(self.test_loader)
