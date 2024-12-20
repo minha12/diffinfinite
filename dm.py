@@ -459,23 +459,38 @@ class GaussianDiffusion(nn.Module):
     
     @torch.no_grad()
     def ddim_multimask(self, x_t, masks, time, time_next, cond_scale=3.0):
-        
-        
-        labels=[torch.unique(mask) for mask in masks]
-        padded_labels = pad_sequence(labels, batch_first=True, padding_value=-1).int()
+        # Get unique labels for each mask and pad them
+        labels = [torch.unique(mask) for mask in masks]
+        # Find max length for padding
+        max_len = max(len(l) for l in labels)
+        # Pad sequences with -1 up to max_len
+        padded_labels = torch.stack([
+            F.pad(l, (0, max_len - len(l)), value=-1) 
+            for l in labels
+        ]).int()
         
         x_next = torch.zeros_like(x_t, device=x_t.device)
         
-        for i in range(len(padded_labels[0])):
-            labels=padded_labels[:,i]
-            indices = torch.where(labels != -1)[0]
-            sub_images, sub_masks, sub_labels=map(lambda x: x[indices].clone(), (x_t,masks,labels)) 
-            #exclude other labels from the sub_masks
-            sub_masks = (sub_masks == sub_labels[:, None, None, None]).float() 
+        # Only process valid indices (not padding)
+        for i in range(max_len):
+            labels = padded_labels[:, i]
+            valid_indices = torch.where(labels >= 0)[0]
             
-            x_next[indices] += self.ddim_onemask(sub_images, sub_labels, sub_masks, time, 
-                                        time_next, cond_scale=cond_scale)*sub_masks      
+            if len(valid_indices) == 0:
+                continue
+                
+            sub_images = x_t[valid_indices]
+            sub_masks = masks[valid_indices]
+            sub_labels = labels[valid_indices]
             
+            # Create binary masks for each label
+            sub_masks = (sub_masks == sub_labels[:, None, None, None]).float()
+            
+            x_next[valid_indices] += self.ddim_onemask(
+                sub_images, sub_labels, sub_masks, 
+                time, time_next, cond_scale=cond_scale
+            ) * sub_masks
+
         return x_next
 
     @torch.no_grad()
