@@ -114,11 +114,12 @@ def create_dataset_csv_v2(data_path: str, threshold=0.3):
     
     # Get all image files
     img_files = [f for f in img_path.iterdir() if f.name.endswith('.png')]
-
+    print(f'Found {len(img_files)} images in {img_path}')
     imgs, labels = [], []
     for f in img_files:
         # Construct mask path for corresponding image
-        mask_file = mask_path / f
+        mask_file = mask_path / f.name
+
         if mask_file.exists():
             mask = np.array(Image.open(mask_file))
             if np.mean(mask > 0) > threshold:
@@ -234,23 +235,16 @@ def dataset_to_dict(data_path: str = data_path):
     return subsets
 
 def skin_dataset_to_dict(data_path: str = data_path):
-    # Get the number of classes
-    num_classes = get_num_classes(data_path)+1
-    # Create an empty dictionary for each class, to store the images belonging to that class
-    subsets = {i: [] for i in range(num_classes-1)}
-
-    # Read the dataset CSV file
+    subsets = {}
     with open(join(data_path, 'dataset.csv'), 'r') as file:
-        # Use a CSV reader to iterate over the rows of the file
         reader = csv.reader(file)
         for row in reader:
-            # Extract the image name and label string from the row
-            img, labels_str = row[0], row[1]
-            # Convert the label string to a list of integers
-            labels = [int(l) for l in labels_str.split()]
-            # Iterate over the labels of the image
-            for label in labels:
-                subsets[label].append(img)
+            image_name, labels_str = row
+            for label_str in labels_str.split():
+                label = int(label_str)
+                if label not in subsets:
+                    subsets[label] = []
+                subsets[label].append(image_name)
     return subsets
 
 def split_dataset(data_path: str = data_path, train_size: float = 0.9):
@@ -291,41 +285,13 @@ def split_dataset(data_path: str = data_path, train_size: float = 0.9):
     return train_set, test_set
 
 def split_skin_dataset(data_path: str = data_path, train_size: float = 0.9):
-    """
-    Splits a dataset into training and test sets, with each set containing data for each class.
-    :param data_path: the path to the dataset
-    :param train_size: the proportion of the data to use for training
-    :return: two dictionaries, one containing the training data and the other containing the test data
-    """
-
-    # Create a dictionary that maps class names to their corresponding data
     subset_dict = skin_dataset_to_dict(data_path)
-
-    # Determine the number of classes and create a list of subclasses
-    classes = get_class_names_json()
-    num_classes = len(classes)
-    subclasses = list(range(num_classes))
-
-    # Create empty dictionaries to hold the training and test data for each subclass
-    train_set, test_set = {}, {}
-    for i in subclasses:
-        train_set[i], test_set[i] = [], []
-
-    # Split the data for each class into training and test sets
-    for i in range(num_classes):
-        class_set = subset_dict[i]
-        class_counts = len(class_set)
-
-        if class_counts>1:
-            # Split the data using the specified train/test ratio
-            train_index, test_index = train_test_split(
-                                            torch.linspace(0, class_counts - 1, class_counts), 
-                                            train_size=train_size)
-            # Add the training and test data to the corresponding dictionary
-            train_set[i] += [class_set[j] for j in train_index.int()]
-            test_set[i] += [class_set[j] for j in test_index.int()]
-
-    return train_set, test_set
+    train_dict, test_dict = {}, {}
+    for i, images in subset_dict.items():
+        train_imgs, test_imgs = train_test_split(images, train_size=train_size, shuffle=True, random_state=42)
+        train_dict[i] = train_imgs
+        test_dict[i] = test_imgs
+    return train_dict, test_dict
 
 def add_unconditional(data_path: str, data_dict: str, no_check=False):
     files = [f for f in Path(data_path).iterdir()]
@@ -392,15 +358,16 @@ def import_skin_dataset(
 ):
     # Generate the dataset CSV file if it does not exist
     if not os.path.exists(join(data_path, "dataset.csv")) or force:
+        print('Creating dataset CSV file...')
         create_dataset_csv_v2(data_path=data_path, threshold=threshold)
 
     train_dict, test_dict = split_skin_dataset(data_path, train_size=0.9)
 
     # Create the train and test datasets
-    train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
+    train_set = DatasetSkin(data_path=data_path, data_dict=train_dict, 
                             subclasses=subclasses, cond_drop_prob=cond_drop_prob,
                             transform=transform)
-    test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
+    test_set = DatasetSkin(data_path=data_path, data_dict=test_dict, 
                            subclasses=subclasses, cond_drop_prob=1.,
                            transform=transform)
 
@@ -480,17 +447,29 @@ class DatasetSkin(Dataset):
         return mask
 
     def unbalanced_data(self):
-        # generate a random number in [0,1)
-        rand_num = torch.rand(1)
-        # find the index of the interval that the random number falls into
-        index = torch.sum(rand_num >= self.cutoffs)
-        self.tmp_index = index
-        # map the index to the appropriate tensor value using PyTorch indexing
-        oneclass_data = self.data_dict[index.item()]
-        # generate a random number in [0,1)
-        rand_num = (torch.rand(1)*len(oneclass_data)).int()
-        # extract random img from the selected class
-        core_path = oneclass_data[rand_num]
+        while True:  # Keep trying until we find a non-empty class
+            # generate a random number in [0,1)
+            rand_num = torch.rand(1)
+            # find the index of the interval that the random number falls into
+            index = torch.sum(rand_num >= self.cutoffs)
+            self.tmp_index = index
+            # map the index to the appropriate tensor value using PyTorch indexing
+            oneclass_data = self.data_dict[index.item()]
+            
+            if len(oneclass_data) > 0:  # Only proceed if the class has images
+                # generate a random number in [0, len(oneclass_data))
+                rand_num = (torch.rand(1) * len(oneclass_data)).int()
+                # extract random img from the selected class
+                core_path = oneclass_data[rand_num]
+                break
+            else:
+                # Redistribute probabilities by updating cutoffs to skip empty classes
+                valid_indices = [i for i, data in self.data_dict.items() if len(data) > 0]
+                if not valid_indices:
+                    raise RuntimeError("No valid data found in any class")
+                probs = [1.0 / len(valid_indices)] * len(valid_indices)
+                self.cutoffs = torch.tensor(probs).cumsum(dim=0)
+    
         # return img and mask path
         img_path = join(self.data_path, "images", f"{core_path}.png")
         mask_path = join(self.data_path, "masks", f"{core_path}.png")
@@ -501,27 +480,29 @@ class DatasetSkin(Dataset):
                 if os.path.exists(extra_path):
                     img_path = extra_path
 
-        # load img and mask
-        img = Image.open(img_path)
+        # load img and mask with consistent channels
+        img = Image.open(img_path).convert('RGB')  # Load as RGB (3 channels)
         if os.path.exists(mask_path):
             mask = Image.open(mask_path)
         else:
-            h,w,c=np.array(img).shape
-            mask=np.zeros((h,w,1)) 
+            # Create mask with correct dimensions
+            w, h = img.size
+            mask = Image.fromarray(np.zeros((h, w), dtype=np.uint8))
 
-        return img,mask
+        return img, mask
 
-
-    def __getitem__(self,idx):
-
+    def __getitem__(self, idx):
         img, mask = self.unbalanced_data()
 
         if self.transform is not None:
-            img,mask = self.transform((img,mask))
-
+            img, mask = self.transform((img, mask))
+        else:
+            img = T.ToTensor()(img)  # Will be 3 channels from RGB
+            mask = T.ToTensor()(mask)
+        
         mask = self.multi_to_single_mask(mask)
 
-        return img,mask
+        return img, mask
     
 class DatasetLung(Dataset):
     def __init__(self,
@@ -595,17 +576,29 @@ class DatasetLung(Dataset):
         return mask
 
     def unbalanced_data(self):
-        # generate a random number in [0,1)
-        rand_num = torch.rand(1)
-        # find the index of the interval that the random number falls into
-        index = torch.sum(rand_num >= self.cutoffs)
-        self.tmp_index = index
-        # map the index to the appropriate tensor value using PyTorch indexing
-        oneclass_data = self.data_dict[index.item()]
-        # generate a random number in [0,1)
-        rand_num = (torch.rand(1)*len(oneclass_data)).int()
-        # extract random img from the selected class
-        core_path = oneclass_data[rand_num]
+        while True:  # Keep trying until we find a non-empty class
+            # generate a random number in [0,1)
+            rand_num = torch.rand(1)
+            # find the index of the interval that the random number falls into
+            index = torch.sum(rand_num >= self.cutoffs)
+            self.tmp_index = index
+            # map the index to the appropriate tensor value using PyTorch indexing
+            oneclass_data = self.data_dict[index.item()]
+            
+            if len(oneclass_data) > 0:  # Only proceed if the class has images
+                # generate a random number in [0, len(oneclass_data))
+                rand_num = (torch.rand(1) * len(oneclass_data)).int()
+                # extract random img from the selected class
+                core_path = oneclass_data[rand_num]
+                break
+            else:
+                # Redistribute probabilities by updating cutoffs to skip empty classes
+                valid_indices = [i for i, data in self.data_dict.items() if len(data) > 0]
+                if not valid_indices:
+                    raise RuntimeError("No valid data found in any class")
+                probs = [1.0 / len(valid_indices)] * len(valid_indices)
+                self.cutoffs = torch.tensor(probs).cumsum(dim=0)
+    
         # return img and mask path
         img_path = join(self.data_path, core_path+'.jpg')
         mask_path = join(self.data_path, core_path+'_mask.png')
@@ -616,24 +609,26 @@ class DatasetLung(Dataset):
                 if os.path.exists(extra_path):
                     img_path = extra_path
 
-        # load img and mask
-        img = Image.open(img_path)
+        # load img and mask with consistent channels
+        img = Image.open(img_path).convert('RGB')  # Load as RGB (3 channels)
         if os.path.exists(mask_path):
             mask = Image.open(mask_path)
         else:
-            h,w,c=np.array(img).shape
-            mask=np.zeros((h,w,1)) 
+            # Create mask with correct dimensions
+            w, h = img.size
+            mask = Image.fromarray(np.zeros((h, w), dtype=np.uint8))
 
-        return img,mask
+        return img, mask
 
-
-    def __getitem__(self,idx):
-
+    def __getitem__(self, idx):
         img, mask = self.unbalanced_data()
 
         if self.transform is not None:
-            img,mask = self.transform((img,mask))
-
+            img, mask = self.transform((img, mask))
+        else:
+            img = T.ToTensor()(img)  # Will be 3 channels from RGB
+            mask = T.ToTensor()(mask)
+        
         mask = self.multi_to_single_mask(mask)
 
-        return img,mask
+        return img, mask

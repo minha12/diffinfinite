@@ -646,12 +646,14 @@ class Trainer(object):
         self.cond_scale = cond_scale
 
         if data_folder:
-            transform=ComposeState([
-                        T.ToTensor(),
-                        T.RandomHorizontalFlip(),
-                        T.RandomVerticalFlip(),
-                        RandomRotate90(),
-                        ])
+            transform = ComposeState([
+                T.ToTensor(),
+                # Remove alpha channel if present to match VAE input requirements
+                T.Lambda(lambda x: x[:3] if x.shape[0] > 3 else x),
+                T.RandomHorizontalFlip(),
+                T.RandomVerticalFlip(),
+                RandomRotate90(),
+            ])
 
             train_loader, test_loader = import_skin_dataset(data_folder,
                                                 batch_size=train_batch_size,   
@@ -670,7 +672,7 @@ class Trainer(object):
         self.ema = EMA(diffusion_model, beta = ema_decay, update_every = ema_update_every)
 
         self.results_folder = Path(results_folder)
-        self.results_folder.mkdir(exist_ok = True)
+        self.results_folder.mkdir(parents=True, exist_ok=True)  # Add parents=True to create all directories
 
         # step counter state
 
@@ -727,10 +729,13 @@ class Trainer(object):
             
     def train_loop(self, imgs, masks):
         with torch.no_grad():
-            imgs=self.vae.module.encode(imgs).latent_dist.sample()/50
+            # Ensure 3 channels for VAE
+            if imgs.shape[1] > 3:
+                imgs = imgs[:, :3]
+            imgs = self.vae.encode(imgs).latent_dist.sample()/50
 
         with self.accelerator.autocast():
-            loss = self.model(img=imgs,classes=masks)
+            loss = self.model(img=imgs, classes=masks)
             
         self.accelerator.backward(loss)        
                         
@@ -754,7 +759,8 @@ class Trainer(object):
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
                     test_images,test_masks=next(self.test_loader)
-                    z = self.vae.module.encode(
+                    test_images = test_images[:, :3] if test_images.shape[1] > 3 else test_images
+                    z = self.vae.encode(
                         test_images[:self.num_samples]).latent_dist.sample()/50
                     z = self.ema.module.ema_model.sample(z,test_masks[:self.num_samples])*50
                     test_samples=torch.clip(self.vae.module.decode(z).sample,0,1)

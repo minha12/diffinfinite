@@ -11,6 +11,7 @@ unet:
   block_per_layer: 2
   
 dm:
+  data_folder: '../pathology-datasets/DRSK/image_patches_512_20x'
   timesteps: 1000
   sampling_timesteps: 250
   batch_size: 32
