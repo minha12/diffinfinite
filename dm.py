@@ -27,7 +27,7 @@ from ema_pytorch import EMA
 
 from accelerate import Accelerator
 
-from dataset import import_dataset, ComposeState, RandomRotate90
+from dataset import import_dataset, ComposeState, RandomRotate90, import_skin_dataset
 from utils.helpers import *
 from utils.modules import *
 
@@ -653,7 +653,7 @@ class Trainer(object):
                         RandomRotate90(),
                         ])
 
-            train_loader, test_loader = import_dataset(data_folder,
+            train_loader, test_loader = import_skin_dataset(data_folder,
                                                 batch_size=train_batch_size,   
                                                 transform=transform)
 

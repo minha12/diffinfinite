@@ -383,7 +383,7 @@ def import_skin_dataset(
         data_path: str = data_path,
         batch_size: int = 32,
         num_workers: int = 0,
-        subclasses: list = None,
+        subclasses: list = [0, 1, 2, 4, 19, 28, 29, 45, 47, 53],
         cond_drop_prob: float = 0.5,
         threshold: float = 0.,
         force: bool = False,
@@ -492,12 +492,12 @@ class DatasetSkin(Dataset):
         # extract random img from the selected class
         core_path = oneclass_data[rand_num]
         # return img and mask path
-        img_path = join(self.data_path, core_path+'.jpg')
-        mask_path = join(self.data_path, core_path+'_mask.png')
+        img_path = join(self.data_path, "images", f"{core_path}.png")
+        mask_path = join(self.data_path, "masks", f"{core_path}.png")
 
         if not os.path.exists(img_path):
             for extra in self.extra:
-                extra_path = join(extra, core_path+'.jpg')
+                extra_path = join(extra, core_path+'.png')
                 if os.path.exists(extra_path):
                     img_path = extra_path
 
