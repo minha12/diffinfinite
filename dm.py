@@ -755,8 +755,6 @@ class Trainer(object):
                     milestone = self.step // self.save_and_sample_every
                     test_images,test_masks=next(self.test_loader)
                     # print stats of test_masks hrere
-                    print("unique values in test_masks")
-                    print( torch.unique(test_masks))
                     z = self.vae.encode(
                         test_images[:self.num_samples]).latent_dist.sample()/50
                     z = self.ema.ema_model.sample(z,test_masks[:self.num_samples])*50
@@ -765,8 +763,8 @@ class Trainer(object):
                 utils.save_image(test_images[:self.num_samples], 
                                  str(self.results_folder / f'images-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))   
-                
-                utils.save_image((test_masks>0).float()[:self.num_samples], 
+                normalized_masks = (test_masks / 255.0).clamp(0, 1)
+                utils.save_image(normalized_masks.float()[:self.num_samples], 
                                  str(self.results_folder / f'masks-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))         
                 
