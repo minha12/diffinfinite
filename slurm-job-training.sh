@@ -4,8 +4,8 @@
 #SBATCH -C fat
 #SBATCH --gpus=1
 #SBATCH -t 3-00:00:00  # 3 days
-#SBATCH --output=train_%j.log
-#SBATCH --error=train_%j.err
+#SBATCH --output=logs/train_%j.log
+#SBATCH --error=logs/train_%j.err
 #SBATCH -J diffusion_train
 
 # Load modules
