@@ -14,13 +14,13 @@ dm:
   data_folder: './images/inpainting'
   timesteps: 1000
   sampling_timesteps: 250
-  batch_size: 32
+  batch_size: 4
   lr: 0.0001
   train_num_steps: 2500
   save_sample_every: 10
   gradient_accumulate_every: 1
   save_loss_every: 10
   num_samples: 4
-  num_workers: 32
+  num_workers: 4
   results_folder: './logs/model_name'
   milestone: null
