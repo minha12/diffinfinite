@@ -157,7 +157,8 @@ def get_class_names(data_path: str = data_path):
         if idx != 9:
             class_names[idx - (idx > 9)] = name
 
-    return class_names[:-1]
+    # Return all classes (remove the [:-1] slice)
+    return class_names
 
 
 def dataset_to_dict(data_path: str = data_path):
