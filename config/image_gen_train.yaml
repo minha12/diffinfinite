@@ -1,7 +1,7 @@
 unet:
   image_size: 512
   dim: 256
-  num_classes: 5
+  num_classes: 
   dim_mults:
     - 1
     - 2
@@ -11,7 +11,7 @@ unet:
   block_per_layer: 2
   
 dm:
-  data_folder: './images/inpainting'
+  data_folder: '../pathology-datasets/DRSK/init_dataset/dm-training-data'
   timesteps: 1000
   sampling_timesteps: 250
   batch_size: 4
@@ -22,5 +22,5 @@ dm:
   save_loss_every: 10
   num_samples: 4
   num_workers: 4
-  results_folder: './logs/model_name_tiny'
+  results_folder: './logs/model_init_dataset'
   milestone: null

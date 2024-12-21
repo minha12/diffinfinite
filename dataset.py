@@ -19,7 +19,7 @@ from PIL import Image
 join=os.path.join
 
 root_path='.'
-local_path='./images/inpainting'
+local_path='./images/path'
 
 data_path=join(root_path,local_path)
 
@@ -146,12 +146,12 @@ def get_class_counts(data_path: str = data_path):
 
 def get_class_names(data_path: str = data_path):
     # Open the YAML file
-    with open(os.path.join(data_path, 'class_to_int.yml'), 'r') as file:
+    with open(os.path.join(data_path, 'label_map_6.yml'), 'r') as file:
         # Load the contents of the file
         contents = yaml.safe_load(file)
 
     # Extract the class names and the number of classes
-    class_dict = contents['features']['target__tfrec']['class_to_int']
+    class_dict = contents['classes']['class_to_int']
     class_names = [None] * len(class_dict)
     for name, idx in class_dict.items():
         if idx != 9:

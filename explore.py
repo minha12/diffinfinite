@@ -384,3 +384,77 @@ def visualize_tissue_patch(polygon_str):
 df = pd.read_csv('../aida_drsk_512_patches_otzu.csv')
 visualize_tissue_patch(df.iloc[0]['polygon_str'])
 # %%
+import cv2
+import numpy as np
+
+# Load mask image
+mask_path = './logs/model_init_dataset/mask-2 d .png'
+mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+
+# Print characteristics
+print(f"Shape: {mask.shape}")
+print(f"Data type: {mask.dtype}")
+print(f"Min value: {mask.min()}")
+print(f"Max value: {mask.max()}")
+print(f"Unique values: {np.unique(mask)}")
+print(f"Mean value: {mask.mean():.2f}")
+print(f"Standard deviation: {mask.std():.2f}")
+print(f"Number of non-zero pixels: {np.count_nonzero(mask)}")
+print(f"Percentage of non-zero pixels: {(np.count_nonzero(mask) / mask.size * 100):.2f}%")
+
+# Optional: Display histogram
+import matplotlib.pyplot as plt
+plt.figure(figsize=(10, 4))
+plt.hist(mask.ravel(), bins=256)
+plt.title('Mask Histogram')
+plt.show()
+# %%
+import os
+import random
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+def analyze_mask():
+    # Find mask files
+    mask_dir = "../pathology-datasets/DRSK/init_dataset/dm-training-data"
+    mask_files = [f for f in os.listdir(mask_dir) if f.endswith('_mask.png')]
+    
+    if not mask_files:
+        print("No mask files found!")
+        return
+    
+    # Select random mask
+    random_mask = random.choice(mask_files)
+    mask_path = os.path.join(mask_dir, random_mask)
+    
+    # Load mask
+    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+    
+    # Print characteristics
+    print(f"Selected mask: {random_mask}")
+    print(f"Shape: {mask.shape}")
+    print(f"Data type: {mask.dtype}")
+    print(f"Min/Max values: {mask.min()}/{mask.max()}")
+    print(f"Unique values: {np.unique(mask)}")
+    print(f"Mean ± std: {mask.mean():.2f} ± {mask.std():.2f}")
+    print(f"Non-zero pixels: {np.count_nonzero(mask)}")
+    print(f"Non-zero percentage: {(np.count_nonzero(mask)/mask.size*100):.2f}%")
+    
+    # Visualize
+    plt.figure(figsize=(12, 4))
+    
+    plt.subplot(121)
+    plt.imshow(mask, cmap='gray')
+    plt.title('Mask Image')
+    
+    plt.subplot(122)
+    plt.hist(mask.ravel(), bins=256)
+    plt.title('Value Distribution')
+    
+    plt.tight_layout()
+    plt.show()
+
+
+analyze_mask()
+# %%
