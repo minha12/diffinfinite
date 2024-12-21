@@ -287,7 +287,7 @@ class DatasetLung(Dataset):
             data_dict: dict,
             subclasses: list = None,
             cond_drop_prob: float = 0.5,
-            extra_unknown_data_path: list = ['unlabelled/data/path1','unlabelled/data/path2',...],
+            extra_unknown_data_path: list = [],
             transform = None):
 
         if subclasses:
@@ -330,14 +330,17 @@ class DatasetLung(Dataset):
         return data_dict
 
     def _cutoffs(self, subclasses, cond_drop_prob=0.5):
+        # Handle None or empty subclasses
+        if not subclasses:
+            return torch.tensor([1.0])  # Single cutoff
         probs=[cond_drop_prob/(len(subclasses)+1) for n in range(len(subclasses)+1)]
         probs.insert(0,1.-cond_drop_prob)
         return torch.Tensor(probs).cumsum(dim=0)
 
     def multi_to_single_mask(self, mask):
         mask=(mask*255).int()
-        mask=torch.where(mask==9,17,mask)
-        mask=torch.where(mask>9,mask-1,mask)
+        # mask=torch.where(mask==9,17,mask)
+        # mask=torch.where(mask>9,mask-1,mask)
         if self.tmp_index==0:
             mask=torch.zeros_like(mask)
         elif self.tmp_index==len(self.subclasses)+1:
