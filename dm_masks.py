@@ -991,7 +991,7 @@ class Trainer(object):
 
     def train_loop(self, imgs, labels):
         with torch.no_grad():
-            imgs = self.vae.module.encode(imgs).latent_dist.sample()
+            imgs = self.vae.encode(imgs).latent_dist.sample()
 
         with self.accelerator.autocast():
             imgs = self.latent_normalize(imgs)
@@ -1036,7 +1036,7 @@ class Trainer(object):
 #                     image_classes = torch.tensor([label] * batch_size).to(self.accelerator.device)
 #                     z = self.ema.module.ema_model.sample(image_classes, cond_scale=self.cond_scale)
 #                     z = self.latent_normalize.un_normalize(z)
-#                     y = self.vae.module.decode(z).sample
+#                     y = self.vae.decode(z).sample
 #                     x = torch.clip((y + 1) / 2, 0, 1)
 #                 else:
                 image_classes = torch.tensor([label] * batch_size).to(torch.int64).to(self.accelerator.device)
@@ -1087,7 +1087,7 @@ class Trainer(object):
                     z = self.ema.module.ema_model.sample(image_classes, cond_scale=self.cond_scale)
                     z = self.latent_normalize.un_normalize(z)
 
-                    y = self.vae.module.decode(z).sample
+                    y = self.vae.decode(z).sample
                     samples = torch.clip((y + 1) / 2, 0, 1)
                     utils.save_image(samples,
                                      str(self.results_folder / f'rgb-sample-{milestone}.png'),
