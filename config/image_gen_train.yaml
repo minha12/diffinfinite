@@ -22,5 +22,5 @@ dm:
   save_loss_every: 10
   num_samples: 4
   num_workers: 4
-  results_folder: './logs/model_name'
+  results_folder: './logs/model_name_tiny'
   milestone: null
