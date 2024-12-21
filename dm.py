@@ -41,6 +41,9 @@ torch.set_float32_matmul_precision('high')
 ModelPrediction =  namedtuple('ModelPrediction', ['pred_noise', 'pred_x_start'])
 
 
+def normalize_to_neg_one_to_one(x):
+    return x * 2.0 - 1.0
+
 # Model
 
 
