@@ -1069,10 +1069,10 @@ class Trainer(object):
         if self.accelerator.is_main_process:
 
             self.ema.to(self.accelerator.device)
-            self.ema.module.update()
+            self.ema.update()
 
             if self.step != 0 and self.step % self.save_and_sample_every == 0:
-                self.ema.module.ema_model.eval()
+                self.ema.ema_model.eval()
 
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
@@ -1084,7 +1084,7 @@ class Trainer(object):
 
                     image_classes = torch.tensor([0, 0, 1, 1]).cuda()
 
-                    z = self.ema.module.ema_model.sample(image_classes, cond_scale=self.cond_scale)
+                    z = self.ema.ema_model.sample(image_classes, cond_scale=self.cond_scale)
                     z = self.latent_normalize.un_normalize(z)
 
                     y = self.vae.decode(z).sample
