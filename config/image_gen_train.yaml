@@ -1,7 +1,7 @@
 unet:
   image_size: 512
   dim: 256
-  num_classes: 64  # Increase this to cover all possible class indices
+  num_classes: 10  # Increase this to cover all possible class indices
   dim_mults:
     - 1
     - 2
@@ -11,15 +11,15 @@ unet:
   block_per_layer: 2
   
 dm:
-  data_folder: '../pathology-datasets/DRSK/image_patches_512_20x'
+  data_folder: './images/inpainting'
   timesteps: 1000
   sampling_timesteps: 250
   batch_size: 32
   lr: 0.0001
-  train_num_steps: 250000
-  save_sample_every: 25000
+  train_num_steps: 2500
+  save_sample_every: 10
   gradient_accumulate_every: 1
-  save_loss_every: 100
+  save_loss_every: 10
   num_samples: 4
   num_workers: 32
   results_folder: './logs/model_name'
