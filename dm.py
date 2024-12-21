@@ -754,6 +754,9 @@ class Trainer(object):
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
                     test_images,test_masks=next(self.test_loader)
+                    # print stats of test_masks hrere
+                    print("unique values in test_masks")
+                    print( torch.unique(test_masks))
                     z = self.vae.encode(
                         test_images[:self.num_samples]).latent_dist.sample()/50
                     z = self.ema.ema_model.sample(z,test_masks[:self.num_samples])*50

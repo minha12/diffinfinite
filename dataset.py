@@ -290,8 +290,6 @@ class DatasetLung(Dataset):
             extra_unknown_data_path: list = [],
             transform = None):
 
-        if subclasses:
-            data_dict = self._subclasses(data_dict,subclasses)
 
         for extra in extra_unknown_data_path:
             data_dict = add_unconditional(data_path=extra, 
@@ -319,16 +317,6 @@ class DatasetLung(Dataset):
             counts+=len(self.data_dict[i])
         return counts
 
-    def _subclasses(self, data_dict: dict, subclasses: list):
-        not_subclasses = []
-        for k in data_dict.keys():
-            if k not in subclasses and k != 0:
-                not_subclasses += data_dict[k]
-        data_dict = {(i+1): data_dict[k] for i, k in enumerate(subclasses)}
-        data_dict[len(subclasses)+1] = not_subclasses
-        data_dict[0]=[]
-        return data_dict
-
     def _cutoffs(self, subclasses, cond_drop_prob=0.5):
         # Handle None or empty subclasses
         if not subclasses:
@@ -336,24 +324,6 @@ class DatasetLung(Dataset):
         probs=[cond_drop_prob/(len(subclasses)+1) for n in range(len(subclasses)+1)]
         probs.insert(0,1.-cond_drop_prob)
         return torch.Tensor(probs).cumsum(dim=0)
-
-    def multi_to_single_mask(self, mask):
-        mask=(mask*255).int()
-        # mask=torch.where(mask==9,17,mask)
-        # mask=torch.where(mask>9,mask-1,mask)
-        if self.tmp_index==0:
-            mask=torch.zeros_like(mask)
-        elif self.tmp_index==len(self.subclasses)+1:
-            uniques=torch.unique(mask).int().tolist()
-            uniques=[unique for unique in uniques if unique not in self.subclasses]
-            if 0 in uniques:
-                uniques.remove(0)
-            for unique in uniques:
-                mask=torch.where(mask==unique, -1, mask)
-            mask=torch.where(mask!=-1, len(self.subclasses)+1, 0)
-        else:
-            mask=torch.where(mask==self.subclasses[self.tmp_index-1], self.tmp_index, 0)
-        return mask
 
     def unbalanced_data(self):
         # generate a random number in [0,1)
@@ -395,6 +365,6 @@ class DatasetLung(Dataset):
         if self.transform is not None:
             img,mask = self.transform((img,mask))
 
-        mask = self.multi_to_single_mask(mask)
+        mask=(mask*255).int()
 
         return img,mask

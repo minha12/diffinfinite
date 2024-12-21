@@ -388,7 +388,7 @@ import cv2
 import numpy as np
 
 # Load mask image
-mask_path = './logs/model_init_dataset/mask-2 d .png'
+mask_path = './logs/model_init_dataset/masks-1.png'
 mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
 
 # Print characteristics
