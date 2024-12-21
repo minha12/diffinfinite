@@ -311,3 +311,76 @@ if image1 is not None and image2 is not None:
 else:
     print("Could not load both images for comparison.")
 # %%
+from types import SimpleNamespace
+import json
+import yaml
+
+def dict_to_namespace(d):
+    json_str = json.dumps(d)
+    return json.loads(json_str, object_hook=lambda d: SimpleNamespace(**d))
+
+# Test YAML with different nesting levels
+test_yaml = """
+level1:
+  level2:
+    level3:
+      level4:
+        level5:
+          value: "deep"
+          array: [1,2,3]
+          nested:
+            even_deeper: true
+simple: "top"
+"""
+
+def test_nesting():
+    config = yaml.safe_load(test_yaml)
+    ns = dict_to_namespace(config)
+    
+    # Test access at different levels
+    print(ns.simple)  # top level
+    print(ns.level1.level2.level3.level4.level5.value)  # deep nesting
+    print(ns.level1.level2.level3.level4.level5.nested.even_deeper)  # deepest
+    print(ns.level1.level2.level3.level4.level5.array)  # array access
+
+if __name__ == "__main__":
+    test_nesting()
+# %%
+import pandas as pd
+import matplotlib.pyplot as plt
+from shapely.wkt import loads
+from shapely.geometry import MultiPolygon, Polygon
+
+def visualize_tissue_patch(polygon_str):
+    # Convert WKT string to MultiPolygon
+    multi_polygon = loads(polygon_str)
+    
+    # Create new figure
+    plt.figure(figsize=(10, 10))
+    
+    # Handle both MultiPolygon and single Polygon cases
+    if isinstance(multi_polygon, MultiPolygon):
+        polygons = list(multi_polygon.geoms)
+    else:
+        polygons = [multi_polygon]
+    
+    # Plot each polygon
+    for polygon in polygons:
+        x, y = polygon.exterior.xy
+        plt.plot(x, y, 'b-')
+        plt.fill(x, y, alpha=0.3)
+        
+        # Plot any interior rings (holes)
+        for interior in polygon.interiors:
+            xi, yi = interior.xy
+            plt.plot(xi, yi, 'r-')
+    
+    plt.axis('equal')
+    plt.title('Tissue Region Boundary')
+    plt.grid(True)
+    plt.show()
+
+# Read CSV and visualize first patch
+df = pd.read_csv('../aida_drsk_512_patches_otzu.csv')
+visualize_tissue_patch(df.iloc[0]['polygon_str'])
+# %%
