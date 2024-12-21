@@ -1,9 +1,15 @@
 from fire import Fire
 import yaml
 from dm import Unet, GaussianDiffusion, Trainer
+import json
+from types import SimpleNamespace
+
+def dict_to_namespace(d):
+    json_str = json.dumps(d)
+    return json.loads(json_str, object_hook=lambda d: SimpleNamespace(**d))
 
 def main(
-        config_file: str = None,
+        config_file: str = "./config/image_gen_train.yaml",
         data_folder: str = None,
         image_size: int = 512,
         dim: int = 256,
@@ -28,69 +34,71 @@ def main(
     if config_file:
         print("Loading config from:", config_file)
         with open(config_file, 'r') as f:
-            config = yaml.safe_load(f)
-
-        unet_conf = config.get('unet', {})
-        image_size = unet_conf.get('image_size', image_size)
-        dim = unet_conf.get('dim', dim)
-        num_classes = unet_conf.get('num_classes', num_classes)
-        dim_mults_list = unet_conf.get('dim_mults', dim_mults)
-        channels = unet_conf.get('channels', channels)
-        resnet_block_groups = unet_conf.get('resnet_block_groups', resnet_block_groups)
-        block_per_layer = unet_conf.get('block_per_layer', block_per_layer)
-
-        dm_conf = config.get('dm', {})
-        data_folder = dm_conf.get('data_folder', data_folder)
-        timesteps = dm_conf.get('timesteps', timesteps)
-        sampling_timesteps = dm_conf.get('sampling_timesteps', sampling_timesteps)
-        batch_size = dm_conf.get('batch_size', batch_size)
-        lr = dm_conf.get('lr', lr)
-        train_num_steps = dm_conf.get('train_num_steps', train_num_steps)
-        save_sample_every = dm_conf.get('save_sample_every', save_sample_every)
-        gradient_accumulate_every = dm_conf.get('gradient_accumulate_every', gradient_accumulate_every)
-        save_loss_every = dm_conf.get('save_loss_every', save_loss_every)
-        num_samples = dm_conf.get('num_samples', num_samples)
-        num_workers = dm_conf.get('num_workers', num_workers)
-        results_folder = dm_conf.get('results_folder', results_folder)
-        milestone = dm_conf.get('milestone', milestone)
-
-    dim_mults=[int(mult) for mult in dim_mults.split(' ')]
-
-    z_size=image_size//8
-    
-    unet = Unet(
-            dim=dim,
-            num_classes=num_classes,
-            dim_mults=dim_mults,
-            channels=channels,
-            resnet_block_groups = resnet_block_groups,
-            block_per_layer=block_per_layer,
+            config = dict_to_namespace(yaml.safe_load(f))
+    else:
+        # Create config namespace from default arguments
+        config = SimpleNamespace(
+            unet=SimpleNamespace(
+                image_size=image_size, dim=dim, num_classes=num_classes,
+                dim_mults=dim_mults, channels=channels,
+                resnet_block_groups=resnet_block_groups,
+                block_per_layer=block_per_layer
+            ),
+            dm=SimpleNamespace(
+                data_folder=data_folder, timesteps=timesteps,
+                sampling_timesteps=sampling_timesteps, batch_size=batch_size,
+                lr=lr, train_num_steps=train_num_steps,
+                save_sample_every=save_sample_every,
+                gradient_accumulate_every=gradient_accumulate_every,
+                save_loss_every=save_loss_every, num_samples=num_samples,
+                num_workers=num_workers, results_folder=results_folder,
+                milestone=milestone
+            )
         )
 
-    model = GaussianDiffusion(
-            unet,
-            image_size=z_size,
-            timesteps=timesteps,
-            sampling_timesteps=sampling_timesteps,
-            loss_type='l2')
-    print(data_folder)
-    trainer = Trainer(
-            model,
-            data_folder=data_folder,
-            train_batch_size=batch_size,
-            train_lr=lr,
-            train_num_steps=train_num_steps,
-            save_and_sample_every=save_sample_every,
-            gradient_accumulate_every=gradient_accumulate_every,
-            save_loss_every=save_loss_every,
-            num_samples=num_samples,
-            num_workers=num_workers,
-            results_folder=results_folder)
+    # Modified dim_mults handling to support both string and list inputs
+    if isinstance(config.unet.dim_mults, str):
+        dim_mults = [int(mult) for mult in config.unet.dim_mults.split(' ')]
+    else:
+        dim_mults = config.unet.dim_mults
+    
+    z_size = config.unet.image_size // 8
+    
+    unet = Unet(
+        dim=config.unet.dim,
+        num_classes=config.unet.num_classes,
+        dim_mults=dim_mults,
+        channels=config.unet.channels,
+        resnet_block_groups=config.unet.resnet_block_groups,
+        block_per_layer=config.unet.block_per_layer,
+    )
 
-    if milestone:
-        trainer.load(milestone)
-    #print(vars(trainer))    
+    model = GaussianDiffusion(
+        unet,
+        image_size=z_size,
+        timesteps=config.dm.timesteps,
+        sampling_timesteps=config.dm.sampling_timesteps,
+        loss_type='l2'
+    )
+
+    trainer = Trainer(
+        model,
+        data_folder=config.dm.data_folder,
+        train_batch_size=config.dm.batch_size,
+        train_lr=config.dm.lr,
+        train_num_steps=config.dm.train_num_steps,
+        save_and_sample_every=config.dm.save_sample_every,
+        gradient_accumulate_every=config.dm.gradient_accumulate_every,
+        save_loss_every=config.dm.save_loss_every,
+        num_samples=config.dm.num_samples,
+        num_workers=config.dm.num_workers,
+        results_folder=config.dm.results_folder
+    )
+
+    if config.dm.milestone:
+        trainer.load(config.dm.milestone)
+
     trainer.train()
 
-if __name__=='__main__':
+if __name__ == '__main__':
     Fire(main)
