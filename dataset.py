@@ -18,8 +18,8 @@ from PIL import Image
 
 join=os.path.join
 
-root_path='working/dir/'
-local_path='data/path'
+root_path='.'
+local_path='./images/inpainting'
 
 data_path=join(root_path,local_path)
 
@@ -179,13 +179,11 @@ def dataset_to_dict(data_path: str = data_path):
             labels = [int(l) for l in labels_str.split()]
             # Iterate over the labels of the image
             for label in labels:
-                # Fix the label for necrosis, which is labeled as 9 in the original dataset
+                # Fix necrosis = 9 -> 2, clamp >4 to 4
                 if label == 9:
-                    label = 18
-                # Decrement the label index for labels greater than or equal to 9, 
-                # since we removed necrosis
-                if label >= 9:
-                    label -= 1
+                    label = 2
+                elif label > 4:
+                    label = 4
                 # Add the image to the subset dictionary for the corresponding class
                 subsets[label].append(img)
     return subsets

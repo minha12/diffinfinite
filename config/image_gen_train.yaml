@@ -1,7 +1,7 @@
 unet:
   image_size: 512
   dim: 256
-  num_classes: 10
+  num_classes: 5
   dim_mults:
     - 1
     - 2
