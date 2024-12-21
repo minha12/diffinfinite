@@ -601,6 +601,7 @@ class Trainer(object):
         diffusion_model,
         *,
         train_batch_size = 16,
+        subclasses = None,  # Add this line
         cond_scale = 3.0,
         gradient_accumulate_every = 1,
         augment_horizontal_flip = True,
@@ -655,7 +656,8 @@ class Trainer(object):
 
             train_loader, test_loader = import_dataset(data_folder,
                                                 batch_size=train_batch_size,   
-                                                transform=transform)
+                                                transform=transform,
+                                                subclasses=subclasses)  # Add this line
 
             train_loader, test_loader = self.accelerator.prepare(train_loader,test_loader)
             self.dl = cycle(train_loader)
@@ -754,6 +756,8 @@ class Trainer(object):
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
                     test_images,test_masks=next(self.test_loader)
+                    print(f"Mask stats: min={test_masks.min()}, max={test_masks.max()}")
+                    print(f"Unique mask values: {torch.unique(test_masks)}")
                     z = self.vae.encode(
                         test_images[:self.num_samples]).latent_dist.sample()/50
                     z = self.ema.ema_model.sample(z,test_masks[:self.num_samples])*50

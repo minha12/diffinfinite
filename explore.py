@@ -386,28 +386,44 @@ visualize_tissue_patch(df.iloc[0]['polygon_str'])
 # %%
 import cv2
 import numpy as np
-
-# Load mask image
-mask_path = './logs/model_init_dataset/mask-2.png'
-mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
-
-# Print characteristics
-print(f"Shape: {mask.shape}")
-print(f"Data type: {mask.dtype}")
-print(f"Min value: {mask.min()}")
-print(f"Max value: {mask.max()}")
-print(f"Unique values: {np.unique(mask)}")
-print(f"Mean value: {mask.mean():.2f}")
-print(f"Standard deviation: {mask.std():.2f}")
-print(f"Number of non-zero pixels: {np.count_nonzero(mask)}")
-print(f"Percentage of non-zero pixels: {(np.count_nonzero(mask) / mask.size * 100):.2f}%")
-
-# Optional: Display histogram
+import os
 import matplotlib.pyplot as plt
-plt.figure(figsize=(10, 4))
-plt.hist(mask.ravel(), bins=256)
-plt.title('Mask Histogram')
-plt.show()
+
+def analyze_mask(mask_path):
+    # Check if file exists
+    if not os.path.exists(mask_path):
+        print(f"Error: File not found at {os.path.abspath(mask_path)}")
+        return
+    
+    # Load mask image
+    mask = cv2.imread(mask_path, cv2.IMREAD_GRAYSCALE)
+    
+    # Check if image loaded successfully
+    if mask is None:
+        print(f"Error: Failed to load image at {os.path.abspath(mask_path)}")
+        return
+        
+    # Print characteristics
+    print(f"File path: {os.path.abspath(mask_path)}")
+    print(f"Shape: {mask.shape}")
+    print(f"Data type: {mask.dtype}")
+    print(f"Min value: {mask.min()}")
+    print(f"Max value: {mask.max()}")
+    print(f"Unique values: {np.unique(mask)}")
+    print(f"Mean value: {mask.mean():.2f}")
+    print(f"Standard deviation: {mask.std():.2f}")
+    print(f"Number of non-zero pixels: {np.count_nonzero(mask)}")
+    print(f"Percentage of non-zero pixels: {(np.count_nonzero(mask) / mask.size * 100):.2f}%")
+
+    # Display histogram
+    plt.figure(figsize=(10, 4))
+    plt.hist(mask.ravel(), bins=256)
+    plt.title('Mask Histogram')
+    plt.show()
+
+# Test with relative and absolute paths
+mask_path = './logs/model_name_tiny/masks-1.png'
+analyze_mask(mask_path)
 # %%
 import os
 import random

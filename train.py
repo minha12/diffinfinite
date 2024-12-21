@@ -81,6 +81,10 @@ def main(
         loss_type='l2'
     )
 
+    # Determine subclasses based on num_classes
+    # Subtract 1 because class indexing starts from 0 and we need to account for the +1 shift in dataset
+    subclasses = list(range(config.unet.num_classes - 1))
+    
     trainer = Trainer(
         model,
         data_folder=config.dm.data_folder,
@@ -92,7 +96,8 @@ def main(
         save_loss_every=config.dm.save_loss_every,
         num_samples=config.dm.num_samples,
         num_workers=config.dm.num_workers,
-        results_folder=config.dm.results_folder
+        results_folder=config.dm.results_folder,
+        subclasses=subclasses
     )
 
     if config.dm.milestone:

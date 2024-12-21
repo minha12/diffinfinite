@@ -285,13 +285,13 @@ class DatasetLung(Dataset):
     def __init__(self,
             data_path: str,
             data_dict: dict,
-            subclasses: list = None,
+            subclasses: list = [0,1,2,3,4,5],
             cond_drop_prob: float = 0.5,
             extra_unknown_data_path: list = [],
             transform = None):
 
-        if subclasses:
-            data_dict = self._subclasses(data_dict,subclasses)
+        # if subclasses:
+        #     data_dict = self._subclasses(data_dict,subclasses)
 
         for extra in extra_unknown_data_path:
             data_dict = add_unconditional(data_path=extra, 
@@ -319,15 +319,15 @@ class DatasetLung(Dataset):
             counts+=len(self.data_dict[i])
         return counts
 
-    def _subclasses(self, data_dict: dict, subclasses: list):
-        not_subclasses = []
-        for k in data_dict.keys():
-            if k not in subclasses and k != 0:
-                not_subclasses += data_dict[k]
-        data_dict = {(i+1): data_dict[k] for i, k in enumerate(subclasses)}
-        data_dict[len(subclasses)+1] = not_subclasses
-        data_dict[0]=[]
-        return data_dict
+    # def _subclasses(self, data_dict: dict, subclasses: list):
+    #     not_subclasses = []
+    #     for k in data_dict.keys():
+    #         if k not in subclasses and k != 0:
+    #             not_subclasses += data_dict[k]
+    #     data_dict = {(i+1): data_dict[k] for i, k in enumerate(subclasses)}
+    #     data_dict[len(subclasses)+1] = not_subclasses
+    #     data_dict[0]=[]
+    #     return data_dict
 
     def _cutoffs(self, subclasses, cond_drop_prob=0.5):
         # Handle None or empty subclasses
@@ -337,32 +337,41 @@ class DatasetLung(Dataset):
         probs.insert(0,1.-cond_drop_prob)
         return torch.Tensor(probs).cumsum(dim=0)
 
-    def multi_to_single_mask(self, mask):
-        mask=(mask*255).int()
-        # mask=torch.where(mask==9,17,mask)
-        # mask=torch.where(mask>9,mask-1,mask)
-        if self.tmp_index==0:
-            mask=torch.zeros_like(mask)
-        elif self.tmp_index==len(self.subclasses)+1:
-            uniques=torch.unique(mask).int().tolist()
-            uniques=[unique for unique in uniques if unique not in self.subclasses]
-            if 0 in uniques:
-                uniques.remove(0)
-            for unique in uniques:
-                mask=torch.where(mask==unique, -1, mask)
-            mask=torch.where(mask!=-1, len(self.subclasses)+1, 0)
-        else:
-            mask=torch.where(mask==self.subclasses[self.tmp_index-1], self.tmp_index, 0)
-        return mask
+    # def multi_to_single_mask(self, mask):
+    #     # print subclass stats here
+    #     print(f"Subclass stats: {len(self.subclasses)}, {self.tmp_index}")
+    #     mask=(mask*255).int()
+    #     # mask=torch.where(mask==9,17,mask)
+    #     # mask=torch.where(mask>9,mask-1,mask)
+    #     if self.tmp_index==0:
+    #         mask=torch.zeros_like(mask)
+    #     elif self.tmp_index==len(self.subclasses)+1:
+    #         uniques=torch.unique(mask).int().tolist()
+    #         uniques=[unique for unique in uniques if unique not in self.subclasses]
+    #         if 0 in uniques:
+    #             uniques.remove(0)
+    #         for unique in uniques:
+    #             mask=torch.where(mask==unique, -1, mask)
+    #         mask=torch.where(mask!=-1, len(self.subclasses)+1, 0)
+    #     else:
+    #         mask=torch.where(mask==self.subclasses[self.tmp_index-1], self.tmp_index, 0)
+    #     # print out stats of mask here
+    #     print(f"Mask stats: {mask.shape}, {mask.min()}, {mask.max()}")
+    #     return mask
 
     def unbalanced_data(self):
         # generate a random number in [0,1)
         rand_num = torch.rand(1)
         # find the index of the interval that the random number falls into
         index = torch.sum(rand_num >= self.cutoffs)
-        self.tmp_index = index
+        # self.tmp_index = index
         # map the index to the appropriate tensor value using PyTorch indexing
+        # print the stat of data_dict here
+        print(f"Data stats: {len(self.data_dict)}")
+        print(self.data_dict)
         oneclass_data = self.data_dict[index.item()]
+        print(oneclass_data)
+        print(f"Class stats: {index.item()}, {len(oneclass_data)}")
         # generate a random number in [0,1)
         rand_num = (torch.rand(1)*len(oneclass_data)).int()
         # extract random img from the selected class
@@ -382,6 +391,7 @@ class DatasetLung(Dataset):
         if os.path.exists(mask_path):
             mask = Image.open(mask_path)
         else:
+            print(f"Mask not found for {core_path}")
             h,w,c=np.array(img).shape
             mask=np.zeros((h,w,1)) 
 
@@ -395,6 +405,6 @@ class DatasetLung(Dataset):
         if self.transform is not None:
             img,mask = self.transform((img,mask))
 
-        mask = self.multi_to_single_mask(mask)
-
+        # mask = self.multi_to_single_mask(mask)
+        print(f"Mask stats: {mask.shape}, {mask.min()}, {mask.max()}")
         return img,mask
