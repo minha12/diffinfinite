@@ -144,6 +144,124 @@ label_map_9 = {
     54: 4   # Subcutaneous_Normal_Surgical -> normal_subcutaneous
 }
 
+# Third option (5 classes)
+label_map_5 = {
+    0: 0,  # tissue_unknown -> unknown
+    1: 1,  # background -> background/artifact
+    2: 1,  # Artifact_Artifact -> background/artifact
+    3: 3,  # Dermis_Squamous cell carcinoma, Keratoacanthoma -> carcinoma
+    4: 3,  # Dermis_Abnormal, Basal cell carcinoma -> carcinoma
+    5: 3,  # Dermis_Abnormal, Benign fibrous histiocytoma -> carcinoma
+    6: 3,  # Dermis_Abnormal, Compound nevus -> carcinoma
+    7: 3,  # Dermis_Abnormal, Dermatofibroma -> carcinoma
+    8: 3,  # Dermis_Abnormal, Dysplastic nevus -> carcinoma
+    9: 3,  # Dermis_Abnormal, Granuloma -> carcinoma
+    10: 2,  # Dermis_Abnormal, Inflammation -> inflammatory/reactive
+    11: 2,  # Dermis_Abnormal, Inflammation, Basal cell carcinoma -> inflammatory/reactive
+    12: 2,  # Dermis_Abnormal, Inflammation, Fibrosis -> inflammatory/reactive
+    13: 2,  # Dermis_Abnormal, Inflammation, SCC Keratoacanthoma -> inflammatory/reactive
+    14: 2,  # Dermis_Abnormal, Inflammation, fibrosis -> inflammatory/reactive
+    15: 2,  # Dermis_Abnormal, Inflammation, Inflammatory edema -> inflammatory/reactive
+    16: 3,  # Dermis_Abnormal, Malignant melanoma -> carcinoma
+    17: 3,  # Dermis_Abnormal, Neurofibroma -> carcinoma
+    18: 3,  # Dermis_Abnormal, Neurofibroma, Surgical margin -> carcinoma
+    19: 2,  # Dermis_Abnormal, Reactive cellular changes -> inflammatory/reactive
+    20: 2,  # Dermis_Abnormal, Reactive cellular changes, Surgical -> inflammatory/reactive
+    21: 3,  # Dermis_Abnormal, Scar -> carcinoma
+    22: 3,  # Dermis_Abnormal, Scar, Surgical margin -> carcinoma
+    23: 3,  # Dermis_Abnormal, Seborrheic keratosis -> carcinoma
+    24: 3,  # Dermis_Abnormal, Squamous cell carcinoma -> carcinoma
+    25: 3,  # Dermis_Abnormal, Squamous cell carcinoma in situ -> carcinoma
+    26: 2,  # Dermis_Abnormal, SCC, Inflammation -> inflammatory/reactive
+    27: 3,  # Dermis_MARGIN -> carcinoma
+    28: 4,  # Dermis_Normal skin -> normal
+    29: 4,  # Dermis_Normal skin, Surgical margin -> normal
+    30: 3,  # Epidermis_SCC, Keratoacanthoma -> carcinoma
+    31: 3,  # Epidermis_Abnormal, Actinic keratosis -> carcinoma
+    32: 3,  # Epidermis_Abnormal, Basal cell carcinoma -> carcinoma
+    33: 3,  # Epidermis_Abnormal, Dysplastic nevus -> carcinoma
+    34: 2,  # Epidermis_Abnormal, Inflammatory edema -> inflammatory/reactive
+    35: 3,  # Epidermis_Abnormal, Lentigo maligna melanoma -> carcinoma
+    36: 3,  # Epidermis_Abnormal, Malignant melanoma -> carcinoma
+    37: 3,  # Epidermis_Abnormal, Melanoma in situ -> carcinoma
+    38: 2,  # Epidermis_Abnormal, Reactive cellular changes -> inflammatory/reactive
+    39: 3,  # Epidermis_Abnormal, Seborrheic keratosis -> carcinoma
+    40: 3,  # Epidermis_Abnormal, SCC in situ -> carcinoma
+    41: 4,  # Epidermis_Normal skin -> normal
+    42: 4,  # Epidermis_Normal skin, Surgical margin -> normal
+    43: 4,  # Perichondrium_Normal skin -> normal
+    44: 4,  # Perichondrium_Normal skin, Surgical margin -> normal
+    45: 4,  # Pilosebaceous apparatus Normal skin -> normal
+    46: 4,  # Pilosebaceous apparatus Normal skin, Surgical -> normal
+    47: 4,  # Skin appendage structure_Normal skin -> normal
+    48: 4,  # Skin appendage structure_Normal skin, Surgical -> normal
+    49: 4,  # Structure of cartilage Normal skin -> normal
+    50: 4,  # Structure of cartilage Normal skin, Surgical -> normal
+    51: 4,  # Subcutaneous fatty tissue_Normal skin -> normal
+    52: 2,  # Subcutaneous tissue_Abnormal, Reactive -> inflammatory/reactive
+    53: 4,  # Subcutaneous tissue_Normal skin -> normal
+    54: 4   # Subcutaneous tissue_Normal skin, Surgical -> normal
+}
+
+# Fourth option (10 classes)
+label_map_10 = {
+    0: 0,  # tissue_unknown -> unknown
+    1: 1,  # background -> background
+    2: 2,  # Artifact_Artifact -> artifacts
+    3: 3,  # Dermis_SCC_Keratoacanthoma -> squamous_cell_carcinoma
+    4: 4,  # Dermis_Abnormal_BCC -> basal_cell_carcinoma
+    5: 0,  # Dermis_Abnormal_Benign_fibrous_histiocytoma -> unknown
+    6: 0,  # Dermis_Abnormal_Compound_nevus -> unknown
+    7: 0,  # Dermis_Abnormal_Dermatofibroma -> unknown
+    8: 0,  # Dermis_Abnormal_Dysplastic_nevus -> unknown
+    9: 0,  # Dermis_Abnormal_Granuloma -> unknown
+    10: 8,  # Dermis_Abnormal_Inflammation -> inflammatory
+    11: 4,  # Dermis_Abnormal_Inflammation_BCC -> basal_cell_carcinoma
+    12: 8,  # Dermis_Abnormal_Inflammation_Fibrosis -> inflammatory
+    13: 8,  # Dermis_Abnormal_Inflammation_SCC -> inflammatory
+    14: 8,  # Dermis_Abnormal_Inflammation_fibrosis -> inflammatory
+    15: 8,  # Dermis_Abnormal_Inflammatory_edema -> inflammatory
+    16: 0,  # Dermis_Abnormal_Malignant_melanoma -> unknown
+    17: 0,  # Dermis_Abnormal_Neurofibroma -> unknown
+    18: 0,  # Dermis_Abnormal_Neurofibroma_Surgical -> unknown
+    19: 9,  # Dermis_Abnormal_Reactive_cellular -> reactive
+    20: 9,  # Dermis_Abnormal_Reactive_cellular_Surgical -> reactive
+    21: 0,  # Dermis_Abnormal_Scar -> unknown
+    22: 0,  # Dermis_Abnormal_Scar_Surgical -> unknown
+    23: 0,  # Dermis_Abnormal_Seborrheic_keratosis -> unknown
+    24: 3,  # Dermis_Abnormal_SCC -> squamous_cell_carcinoma
+    25: 3,  # Dermis_Abnormal_SCC_in_situ -> squamous_cell_carcinoma
+    26: 8,  # Dermis_Abnormal_SCC_Inflammation -> inflammatory
+    27: 0,  # Dermis_MARGIN -> unknown
+    28: 5,  # Dermis_Normal -> normal_dermis
+    29: 5,  # Dermis_Normal_Surgical -> normal_dermis
+    30: 3,  # Epidermis_SCC_Keratoacanthoma -> squamous_cell_carcinoma
+    31: 3,  # Epidermis_Abnormal_Actinic_keratosis -> squamous_cell_carcinoma
+    32: 4,  # Epidermis_Abnormal_BCC -> basal_cell_carcinoma
+    33: 0,  # Epidermis_Abnormal_Dysplastic_nevus -> unknown
+    34: 8,  # Epidermis_Abnormal_Inflammatory_edema -> inflammatory
+    35: 0,  # Epidermis_Abnormal_Lentigo_maligna_melanoma -> unknown
+    36: 0,  # Epidermis_Abnormal_Malignant_melanoma -> unknown
+    37: 0,  # Epidermis_Abnormal_Melanoma_in_situ -> unknown
+    38: 9,  # Epidermis_Abnormal_Reactive -> reactive
+    39: 0,  # Epidermis_Abnormal_Seborrheic_keratosis -> unknown
+    40: 3,  # Epidermis_Abnormal_SCC_in_situ -> squamous_cell_carcinoma
+    41: 6,  # Epidermis_Normal -> normal_epidermis
+    42: 6,  # Epidermis_Normal_Surgical -> normal_epidermis
+    43: 7,  # Perichondrium_Normal -> normal_appendages
+    44: 7,  # Perichondrium_Normal_Surgical -> normal_appendages
+    45: 7,  # Pilosebaceous_Normal -> normal_appendages
+    46: 7,  # Pilosebaceous_Normal_Surgical -> normal_appendages
+    47: 7,  # Skin_appendage_Normal -> normal_appendages
+    48: 7,  # Skin_appendage_Normal_Surgical -> normal_appendages
+    49: 7,  # Structure_cartilage_Normal -> normal_appendages
+    50: 7,  # Structure_cartilage_Normal_Surgical -> normal_appendages
+    51: 7,  # Subcutaneous_fatty_Normal -> normal_appendages
+    52: 9,  # Subcutaneous_Abnormal_Reactive -> reactive
+    53: 7,  # Subcutaneous_Normal -> normal_appendages
+    54: 7   # Subcutaneous_Normal_Surgical -> normal_appendages
+}
+
 def reduce_mask_classes(mask_path, output_path, label_map):
     mask = Image.open(mask_path)
     mask_array = np.array(mask)
