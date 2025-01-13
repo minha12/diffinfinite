@@ -283,20 +283,30 @@ def process_directory(input_dir: str = "../pathology-datasets/DRSK/init_dataset/
     Args:
         input_dir: Directory containing mask images
         output_dir: Directory to save processed masks
-        num_classes: Number of classes to reduce to (6 or 9)
+        num_classes: Number of classes to reduce to (5, 6, 9, or 10)
         validate: Whether to validate label maps against label_enum.json
         ext: File extension of mask images ('png' or 'jpg')
     """
     if validate:
         validate_label_maps({
+            'label_map_5': label_map_5,
             'label_map_6': label_map_6,
-            'label_map_9': label_map_9
+            'label_map_9': label_map_9,
+            'label_map_10': label_map_10
         })
     
     os.makedirs(output_dir, exist_ok=True)
     mask_files = list(Path(input_dir).glob(f'*.{ext}'))
     
-    label_map = label_map_6 if num_classes == 6 else label_map_9
+    label_map = {
+        5: label_map_5,
+        6: label_map_6,
+        9: label_map_9,
+        10: label_map_10
+    }.get(num_classes)
+    
+    if label_map is None:
+        raise ValueError(f"Invalid number of classes: {num_classes}. Must be 5, 6, 9, or 10.")
     
     for mask_file in tqdm(mask_files, desc=f"Processing masks ({num_classes} classes)"):
         # Construct output filename with _mask.png suffix
