@@ -158,7 +158,8 @@ def reduce_mask_classes(mask_path, output_path, label_map):
 def process_directory(input_dir: str = "../pathology-datasets/DRSK/init_dataset/masks",
                      output_dir: str = "../pathology-datasets/DRSK/init_dataset/dm-training-data",
                      num_classes: int = 6,
-                     validate: bool = False):
+                     validate: bool = False,
+                     ext: str = 'png'):
     """
     Process mask images to reduce number of classes.
     Args:
@@ -166,6 +167,7 @@ def process_directory(input_dir: str = "../pathology-datasets/DRSK/init_dataset/
         output_dir: Directory to save processed masks
         num_classes: Number of classes to reduce to (6 or 9)
         validate: Whether to validate label maps against label_enum.json
+        ext: File extension of mask images ('png' or 'jpg')
     """
     if validate:
         validate_label_maps({
@@ -174,7 +176,7 @@ def process_directory(input_dir: str = "../pathology-datasets/DRSK/init_dataset/
         })
     
     os.makedirs(output_dir, exist_ok=True)
-    mask_files = list(Path(input_dir).glob('*.png'))
+    mask_files = list(Path(input_dir).glob(f'*.{ext}'))
     
     label_map = label_map_6 if num_classes == 6 else label_map_9
     
