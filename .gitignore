@@ -12,3 +12,6 @@ logs/
 mask-viz/
 models/
 changes.txt
+train_*
+*.log
+images_list.txt
