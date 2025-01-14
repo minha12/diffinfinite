@@ -208,58 +208,73 @@ label_map_10 = {
     0: 0,  # tissue_unknown -> unknown
     1: 1,  # background -> background
     2: 2,  # Artifact_Artifact -> artifacts
-    3: 3,  # Dermis_SCC_Keratoacanthoma -> Carcinoma_High_Grade
-    4: 4,  # Dermis_Abnormal_BCC -> Carcinoma_Low_Grade
-    5: 9,  # Dermis_Abnormal_Benign_fibrous_histiocytoma -> Reactive_Changes
-    6: 9,  # Dermis_Abnormal_Compound_nevus -> Reactive_Changes
-    7: 9,  # Dermis_Abnormal_Dermatofibroma -> Reactive_Changes
-    8: 4,  # Dermis_Abnormal_Dysplastic_nevus -> Carcinoma_Low_Grade
-    9: 8,  # Dermis_Abnormal_Granuloma -> Inflammatory_Chronic
-    10: 7,  # Dermis_Abnormal_Inflammation -> Inflammatory_Acute
-    11: 4,  # Dermis_Abnormal_Inflammation_BCC -> Carcinoma_Low_Grade
-    12: 8,  # Dermis_Abnormal_Inflammation_Fibrosis -> Inflammatory_Chronic
-    13: 7,  # Dermis_Abnormal_Inflammation_SCC -> Inflammatory_Acute
-    14: 8,  # Dermis_Abnormal_Inflammation_fibrosis -> Inflammatory_Chronic
-    15: 7,  # Dermis_Abnormal_Inflammatory_edema -> Inflammatory_Acute
-    16: 3,  # Dermis_Abnormal_Malignant_melanoma -> Carcinoma_High_Grade
-    17: 9,  # Dermis_Abnormal_Neurofibroma -> Reactive_Changes
-    18: 9,  # Dermis_Abnormal_Neurofibroma_Surgical -> Reactive_Changes
-    19: 9,  # Dermis_Abnormal_Reactive_cellular -> Reactive_Changes
-    20: 9,  # Dermis_Abnormal_Reactive_cellular_Surgical -> Reactive_Changes
-    21: 9,  # Dermis_Abnormal_Scar -> Reactive_Changes
-    22: 9,  # Dermis_Abnormal_Scar_Surgical -> Reactive_Changes
-    23: 4,  # Dermis_Abnormal_Seborrheic_keratosis -> Carcinoma_Low_Grade
-    24: 3,  # Dermis_Abnormal_SCC -> Carcinoma_High_Grade
-    25: 4,  # Dermis_Abnormal_SCC_in_situ -> Carcinoma_Low_Grade
-    26: 7,  # Dermis_Abnormal_SCC_Inflammation -> Inflammatory_Acute
-    27: 0,  # Dermis_MARGIN -> Unknown
-    28: 5,  # Dermis_Normal -> Normal_Epithelial
-    29: 5,  # Dermis_Normal_Surgical -> Normal_Epithelial
-    30: 3,  # Epidermis_SCC_Keratoacanthoma -> Carcinoma_High_Grade
-    31: 4,  # Epidermis_Abnormal_Actinic_keratosis -> Carcinoma_Low_Grade
-    32: 4,  # Epidermis_Abnormal_BCC -> Carcinoma_Low_Grade
-    33: 4,  # Epidermis_Abnormal_Dysplastic_nevus -> Carcinoma_Low_Grade
-    34: 7,  # Epidermis_Abnormal_Inflammatory_edema -> Inflammatory_Acute
-    35: 3,  # Epidermis_Abnormal_Lentigo_maligna_melanoma -> Carcinoma_High_Grade
-    36: 3,  # Epidermis_Abnormal_Malignant_melanoma -> Carcinoma_High_Grade
-    37: 4,  # Epidermis_Abnormal_Melanoma_in_situ -> Carcinoma_Low_Grade
-    38: 9,  # Epidermis_Abnormal_Reactive -> Reactive_Changes
-    39: 4,  # Epidermis_Abnormal_Seborrheic_keratosis -> Carcinoma_Low_Grade
-    40: 4,  # Epidermis_Abnormal_SCC_in_situ -> Carcinoma_Low_Grade
-    41: 5,  # Epidermis_Normal -> Normal_Epithelial
-    42: 5,  # Epidermis_Normal_Surgical -> Normal_Epithelial
-    43: 6,  # Perichondrium_Normal -> Normal_Supporting
-    44: 6,  # Perichondrium_Normal_Surgical -> Normal_Supporting
-    45: 6,  # Pilosebaceous_Normal -> Normal_Supporting
-    46: 6,  # Pilosebaceous_Normal_Surgical -> Normal_Supporting
-    47: 6,  # Skin_appendage_Normal -> Normal_Supporting
-    48: 6,  # Skin_appendage_Normal_Surgical -> Normal_Supporting
-    49: 6,  # Structure_cartilage_Normal -> Normal_Supporting
-    50: 6,  # Structure_cartilage_Normal_Surgical -> Normal_Supporting
-    51: 6,  # Subcutaneous_fatty_Normal -> Normal_Supporting
-    52: 9,  # Subcutaneous_Abnormal_Reactive -> Reactive_Changes
-    53: 6,  # Subcutaneous_Normal -> Normal_Supporting
-    54: 6   # Subcutaneous_Normal_Surgical -> Normal_Supporting
+    
+    # Carcinoma group (combines all types)
+    3: 3,  # Dermis_SCC -> carcinoma
+    4: 3,  # Dermis_BCC -> carcinoma
+    16: 3, # Malignant_melanoma -> carcinoma
+    24: 3, # SCC -> carcinoma
+    25: 3, # SCC_in_situ -> carcinoma
+    30: 3, # Epidermis_SCC -> carcinoma
+    31: 3, # Actinic_keratosis -> carcinoma
+    32: 3, # Epidermis_BCC -> carcinoma
+    35: 3, # Lentigo_maligna_melanoma -> carcinoma
+    36: 3, # Epidermis_Malignant_melanoma -> carcinoma
+    37: 3, # Melanoma_in_situ -> carcinoma
+    40: 3, # Epidermis_SCC_in_situ -> carcinoma
+    
+    # Normal dermis
+    28: 4, # Dermis_Normal -> normal_dermis
+    29: 4, # Dermis_Normal_Surgical -> normal_dermis
+    
+    # Normal epidermis
+    41: 5, # Epidermis_Normal -> normal_epidermis
+    42: 5, # Epidermis_Normal_Surgical -> normal_epidermis
+    
+    # Normal appendages
+    43: 6, # Perichondrium_Normal -> normal_appendages
+    44: 6, # Perichondrium_Normal_Surgical -> normal_appendages
+    45: 6, # Pilosebaceous_Normal -> normal_appendages
+    46: 6, # Pilosebaceous_Normal_Surgical -> normal_appendages
+    47: 6, # Skin_appendage_Normal -> normal_appendages
+    48: 6, # Skin_appendage_Normal_Surgical -> normal_appendages
+    
+    # Inflammatory conditions
+    10: 7, # Inflammation -> inflammatory
+    11: 7, # Inflammation_BCC -> inflammatory
+    12: 7, # Inflammation_Fibrosis -> inflammatory
+    13: 7, # Inflammation_SCC -> inflammatory
+    14: 7, # Inflammation_fibrosis -> inflammatory
+    15: 7, # Inflammatory_edema -> inflammatory
+    26: 7, # SCC_Inflammation -> inflammatory
+    34: 7, # Epidermis_Inflammatory -> inflammatory
+    
+    # Reactive changes
+    19: 8, # Reactive_cellular -> reactive
+    20: 8, # Reactive_cellular_Surgical -> reactive
+    38: 8, # Epidermis_Reactive -> reactive
+    52: 8, # Subcutaneous_Reactive -> reactive
+    
+    # Structural changes
+    5: 9,  # Benign_fibrous_histiocytoma -> structural
+    6: 9,  # Compound_nevus -> structural
+    7: 9,  # Dermatofibroma -> structural
+    8: 9,  # Dysplastic_nevus -> structural
+    9: 9,  # Granuloma -> structural
+    17: 9, # Neurofibroma -> structural
+    18: 9, # Neurofibroma_Surgical -> structural
+    21: 9, # Scar -> structural
+    22: 9, # Scar_Surgical -> structural
+    23: 9, # Seborrheic_keratosis -> structural
+    33: 9, # Epidermis_Dysplastic -> structural
+    39: 9, # Seborrheic_keratosis -> structural
+    
+    # Normal subcutaneous (goes to normal appendages)
+    49: 6, # Structure_cartilage -> normal_appendages
+    50: 6, # Structure_cartilage_Surgical -> normal_appendages
+    51: 6, # Subcutaneous_fatty -> normal_appendages
+    53: 6, # Subcutaneous_Normal -> normal_appendages
+    54: 6  # Subcutaneous_Normal_Surgical -> normal_appendages
 }
 
 def reduce_mask_classes(mask_path, output_path, label_map):
@@ -273,11 +288,11 @@ def reduce_mask_classes(mask_path, output_path, label_map):
     new_mask = Image.fromarray(mask_array.astype(np.uint8))
     new_mask.save(output_path)
 
-def process_directory(input_dir: str = "../pathology-datasets/DRSK/init_dataset/masks",
-                     output_dir: str = "../pathology-datasets/DRSK/init_dataset/dm-training-data",
-                     num_classes: int = 6,
+def process_directory(input_dir: str = "../pathology-datasets/DRSK/full_dataset/masks",
+                     output_dir: str = "../pathology-datasets/DRSK/full_dataset/dm-training-data",
+                     num_classes: int = 5,
                      validate: bool = False,
-                     ext: str = 'png'):
+                     ext: str = 'jpg'):
     """
     Process mask images to reduce number of classes.
     Args:
