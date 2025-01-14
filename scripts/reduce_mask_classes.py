@@ -280,12 +280,16 @@ label_map_10 = {
 def reduce_mask_classes(mask_path, output_path, label_map):
     mask = Image.open(mask_path)
     mask_array = np.array(mask)
-
-    # Vectorized conversion or loop
+    
+    # Create output array filled with unknown class (0)
+    output_array = np.zeros_like(mask_array)
+    
+    # Apply label mapping for known classes
     for old_label, new_label in label_map.items():
-        mask_array[mask_array == old_label] = new_label
-
-    new_mask = Image.fromarray(mask_array.astype(np.uint8))
+        output_array[mask_array == old_label] = new_label
+        
+    # Any unmapped values will remain 0 (unknown class)
+    new_mask = Image.fromarray(output_array.astype(np.uint8))
     new_mask.save(output_path)
 
 def process_directory(input_dir: str = "../pathology-datasets/DRSK/full_dataset/masks",
