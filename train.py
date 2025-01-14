@@ -92,7 +92,8 @@ def main(
         save_loss_every=config.dm.save_loss_every,
         num_samples=config.dm.num_samples,
         num_workers=config.dm.num_workers,
-        results_folder=config.dm.results_folder
+        results_folder=config.dm.results_folder,
+        config_file=config_file  # Add this line to pass config_file
     )
 
     if config.dm.milestone:

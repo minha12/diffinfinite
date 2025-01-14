@@ -620,6 +620,7 @@ class Trainer(object):
         split_batches = True,
         convert_image_to = None,
         out_size=None,
+        config_file = None,
     ):
         super().__init__()
 
@@ -655,7 +656,8 @@ class Trainer(object):
 
             train_loader, test_loader = import_dataset(data_folder,
                                                 batch_size=train_batch_size,   
-                                                transform=transform)
+                                                transform=transform,
+                                                config_file=config_file)
 
             train_loader, test_loader = self.accelerator.prepare(train_loader,test_loader)
             self.dl = cycle(train_loader)
@@ -727,7 +729,7 @@ class Trainer(object):
             
     def train_loop(self, imgs, masks):
         with torch.no_grad():
-            imgs=self.vae.encode(imgs).latent_dist.sample()/50
+            imgs=self.vae.module.encode(imgs).latent_dist.sample()/50
 
         with self.accelerator.autocast():
             loss = self.model(img=imgs,classes=masks)
@@ -755,7 +757,7 @@ class Trainer(object):
                     milestone = self.step // self.save_and_sample_every
                     test_images,test_masks=next(self.test_loader)
                     # print stats of test_masks hrere
-                    z = self.vae.encode(
+                    z = self.vae.module.encode(
                         test_images[:self.num_samples]).latent_dist.sample()/50
                     z = self.ema.ema_model.sample(z,test_masks[:self.num_samples])*50
                     test_samples=torch.clip(self.vae.decode(z).sample,0,1)

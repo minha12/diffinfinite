@@ -144,11 +144,32 @@ def get_class_counts(data_path: str = data_path):
     return counts
 
 
-def get_class_names(data_path: str = data_path):
+def get_label_map_filename(config_file: str) -> str:
+    """Get the appropriate label map filename based on config."""
+    try:
+        with open(config_file, 'r') as f:
+            config = yaml.safe_load(f)
+            num_classes = config['unet']['num_classes']
+    except (FileNotFoundError, KeyError):
+        num_classes = 5
+    
+    return f'label_map_{num_classes}.yml'
+
+def get_class_names(data_path: str = data_path, config_file: str = None):
+    if config_file:
+        label_map_file = get_label_map_filename(config_file)
+    else:
+        label_map_file = 'label_map_5.yml'  # fallback default
+    
     # Open the YAML file
-    with open(os.path.join(data_path, 'label_map_6.yml'), 'r') as file:
-        # Load the contents of the file
-        contents = yaml.safe_load(file)
+    try:
+        with open(os.path.join(data_path, label_map_file), 'r') as file:
+            # Load the contents of the file
+            contents = yaml.safe_load(file)
+    except FileNotFoundError:
+        # Fallback to default if specific file not found
+        with open(os.path.join(data_path, 'label_map_5.yml'), 'r') as file:
+            contents = yaml.safe_load(file)
 
     # Extract the class names and the number of classes
     class_dict = contents['classes']['class_to_int']
@@ -190,7 +211,7 @@ def dataset_to_dict(data_path: str = data_path):
     return subsets
 
 
-def split_dataset(data_path: str = data_path, train_size: float = 0.9):
+def split_dataset(data_path: str = data_path, train_size: float = 0.9, config_file: str = None):
     """
     Splits a dataset into training and test sets, with each set containing data for each class.
     :param data_path: the path to the dataset
@@ -202,7 +223,7 @@ def split_dataset(data_path: str = data_path, train_size: float = 0.9):
     subset_dict = dataset_to_dict(data_path)
 
     # Determine the number of classes and create a list of subclasses
-    classes = get_class_names(data_path)
+    classes = get_class_names(data_path, config_file=config_file)
     num_classes = len(classes)
     subclasses = list(range(num_classes))
 
@@ -258,13 +279,14 @@ def import_dataset(
         threshold: float = 0.,
         force: bool = False,
         transform=None,
+        config_file: str = None,
         **kwargs
 ):
     # Generate the dataset CSV file if it does not exist
     if not os.path.exists(join(data_path, "dataset.csv")) or force:
         create_dataset_csv(data_path=data_path, threshold=threshold)
 
-    train_dict, test_dict = split_dataset(data_path, train_size=0.9)
+    train_dict, test_dict = split_dataset(data_path, train_size=0.9, config_file=config_file)
 
     # Create the train and test datasets
     train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
