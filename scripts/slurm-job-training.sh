@@ -35,7 +35,7 @@ MONITOR_PID=$!
 cd /proj/berzelius-2023-296/users/x_lemin/diffinfinite
 
 # Run training script
-python train.py
+accelerate launch train.py --config_file config/image_gen_train.yaml
 
 # Kill the monitoring process
 kill $MONITOR_PID
