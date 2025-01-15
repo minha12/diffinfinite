@@ -708,9 +708,8 @@ class Trainer(object):
         torch.save(data, str(self.results_folder / f'model-{milestone}.pt'))
 
     def load(self, milestone):
-
         data = torch.load(str(self.results_folder / f'model-{milestone}.pt'), map_location=self.accelerator.device)
-
+        
         self.model = self.accelerator.unwrap_model(self.model)
         self.model.load_state_dict(data['model'])
 
@@ -724,7 +723,17 @@ class Trainer(object):
 
         if exists(data['scaler']):
             self.accelerator.scaler.load_state_dict(data['scaler'])
-            
+
+        # Access base scheduler or use stored max_lr
+        base_scheduler = getattr(self.scheduler, 'scheduler', self.scheduler)
+        max_lr = getattr(base_scheduler, 'max_lrs', [self.learning_rate])[0]
+        
+        # Create new scheduler with remaining steps
+        remaining_steps = self.train_num_steps - self.step
+        self.scheduler = lr_scheduler.OneCycleLR(self.opt, 
+                                               max_lr=max_lr,
+                                               total_steps=remaining_steps)
+
         self.model, self.opt, self.ema, self.scheduler = self.accelerator.prepare(self.model, self.opt, self.ema, self.scheduler)
             
     def train_loop(self, imgs, masks):
