@@ -679,6 +679,7 @@ class Trainer(object):
         self.step = 0
         self.running_loss=[]
         self.running_lr=[]
+        self.learning_rate = train_lr  # Store learning rate
 
         # prepare model, optimizer with accelerator
 
@@ -731,7 +732,7 @@ class Trainer(object):
         # Create new scheduler with remaining steps
         remaining_steps = self.train_num_steps - self.step
         self.scheduler = lr_scheduler.OneCycleLR(self.opt, 
-                                               max_lr=max_lr,
+                                               max_lr=self.learning_rate,  # Use stored value
                                                total_steps=remaining_steps)
 
         self.model, self.opt, self.ema, self.scheduler = self.accelerator.prepare(self.model, self.opt, self.ema, self.scheduler)
