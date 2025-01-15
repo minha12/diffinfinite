@@ -95,7 +95,7 @@ label_map_10 = {
     39: 9  # Seborrheic_keratosis -> structural
 }
 
-def calculate_class_distribution(csv_path='pixel_class_percentages_full.csv', num_classes=5):
+def calculate_class_distribution(csv_path='data/pixel_class_percentages_full.csv', num_classes=5):
     """Calculate pixel distribution for different classification schemes.
     
     Args:
