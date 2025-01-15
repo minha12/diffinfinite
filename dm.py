@@ -595,7 +595,7 @@ class GaussianDiffusion(nn.Module):
         img = normalize_to_neg_one_to_one(img)
         return self.p_losses(img, t, *args, **kwargs)
 
-class Trainer(object):
+class Trainer:
     def __init__(
         self,
         diffusion_model,
@@ -624,11 +624,14 @@ class Trainer(object):
     ):
         super().__init__()
 
+        # 1. Initialize accelerator before model creation
         self.accelerator = Accelerator(
             split_batches = split_batches,
             mixed_precision = 'fp16' if fp16 else 'no',
             gradient_accumulation_steps=gradient_accumulate_every
         )
+        # Get device from accelerator
+        self.device = self.accelerator.device
 
         self.accelerator.native_amp = amp
 
@@ -681,16 +684,18 @@ class Trainer(object):
         self.running_lr=[]
         self.learning_rate = train_lr  # Store learning rate
 
-        # prepare model, optimizer with accelerator
+        # 2. Create VAE before DDP wrapping
+        self.vae = DiffusionPipeline.from_pretrained(
+            "stabilityai/stable-diffusion-2-base"
+        ).vae
+
+        # 3. Prepare models separately
+        # self.model = self.accelerator.prepare(self.model)
+        self.vae = self.accelerator.prepare(self.vae)
 
         self.scheduler = lr_scheduler.OneCycleLR(self.opt, max_lr=train_lr, total_steps=train_num_steps)
         self.model, self.opt, self.ema, self.scheduler = self.accelerator.prepare(self.model, self.opt, self.ema, self.scheduler)
 
-        repo_id = "stabilityai/stable-diffusion-2-base"
-        self.vae = DiffusionPipeline.from_pretrained(repo_id).vae
-        
-        self.vae = self.accelerator.prepare(self.vae)
-        
     def save(self, milestone):
         if not self.accelerator.is_local_main_process:
             return
@@ -738,11 +743,13 @@ class Trainer(object):
         self.model, self.opt, self.ema, self.scheduler = self.accelerator.prepare(self.model, self.opt, self.ema, self.scheduler)
             
     def train_loop(self, imgs, masks):
+        # Move VAE encoding outside of the training loop
         with torch.no_grad():
-            imgs=self.vae.encode(imgs).latent_dist.sample()/50
+            vae = self.accelerator.unwrap_model(self.vae)
+            imgs = vae.encode(imgs).latent_dist.sample() / 50
 
         with self.accelerator.autocast():
-            loss = self.model(img=imgs,classes=masks)
+            loss = self.model(img=imgs, classes=masks)
             
         self.accelerator.backward(loss)        
                         
@@ -755,36 +762,41 @@ class Trainer(object):
         return loss
     
     def eval_loop(self):
-        
         if self.accelerator.is_main_process:
-            self.ema.to(self.accelerator.device)
-            self.ema.update()
+            # Get unwrapped models
+            unwrapped_model = self.accelerator.unwrap_model(self.model)
+            unwrapped_ema = self.accelerator.unwrap_model(self.ema)
+            
+            unwrapped_ema.to(self.accelerator.device)
+            unwrapped_ema.update()
 
             if self.step != 0 and self.step % self.save_and_sample_every == 0:
-                self.ema.ema_model.eval()
+                # No need to unwrap ema_model again since we already have it unwrapped
+                unwrapped_ema.ema_model.eval()
 
                 with torch.no_grad():
                     milestone = self.step // self.save_and_sample_every
-                    test_images,test_masks=next(self.test_loader)
-                    # print stats of test_masks hrere
-                    z = self.vae.encode(
-                        test_images[:self.num_samples]).latent_dist.sample()/50
-                    z = self.ema.ema_model.sample(z,test_masks[:self.num_samples])*50
-                    test_samples=torch.clip(self.vae.decode(z).sample,0,1)
+                    test_images, test_masks = next(self.test_loader)
                     
-                utils.save_image(test_images[:self.num_samples], 
+                    # Unwrap VAE model as before
+                    vae = self.accelerator.unwrap_model(self.vae)
+                    z = vae.encode(test_images[:self.num_samples]).latent_dist.sample() / 50
+                    z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples]) * 50
+                    test_samples = torch.clip(vae.decode(z).sample, 0, 1)
+                    
+                    utils.save_image(test_images[:self.num_samples], 
                                  str(self.results_folder / f'images-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))   
-                normalized_masks = (test_masks / 255.0).clamp(0, 1)
-                utils.save_image(normalized_masks.float()[:self.num_samples], 
+                    normalized_masks = (test_masks / 255.0).clamp(0, 1)
+                    utils.save_image(normalized_masks.float()[:self.num_samples], 
                                  str(self.results_folder / f'masks-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))         
-                
-                utils.save_image(test_samples, 
+                    
+                    utils.save_image(test_samples, 
                                  str(self.results_folder / f'sample-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))
-                
-                self.save(milestone)
+                    
+                    self.save(milestone)
 
     def train(self):
 
