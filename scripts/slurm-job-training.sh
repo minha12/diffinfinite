@@ -2,7 +2,7 @@
 
 #SBATCH -A Berzelius-2024-460
 #SBATCH -C fat
-#SBATCH --gpus=1
+#SBATCH --gpus=4
 #SBATCH -t 3-00:00:00  # 3 days
 #SBATCH --output=logs/train_%j.log
 #SBATCH --error=logs/train_%j.err
@@ -35,7 +35,7 @@ MONITOR_PID=$!
 cd /proj/berzelius-2023-296/users/x_lemin/diffinfinite
 
 # Run training script
-accelerate launch train.py --config_file config/image_gen_train.yaml
+accelerate launch --config_file config/accelerate_config.yaml train.py --config_file config/image_gen_train_xgpus.yaml
 
 # Kill the monitoring process
 kill $MONITOR_PID
