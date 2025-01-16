@@ -1,0 +1,4 @@
+(diffinf) x_lemin@berzelius2:diffinfinite$ python scripts/find_unknown_masks.py 
+Processing mask files: 100%|███████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████████| 246755/246755 [19:12<00:00, 214.06file/s]
+Found 156024 files containing only unknown tissue (label 0)
+File names have been written to unknown_tissue_only_files.txt
