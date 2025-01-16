@@ -1,0 +1,26 @@
+unet:
+  image_size: 512
+  dim: 256
+  num_classes: 5
+  dim_mults:
+    - 1
+    - 2
+    - 4
+  channels: 4
+  resnet_block_groups: 2
+  block_per_layer: 2
+  
+dm:
+  data_folder: '../pathology-datasets/DRSK/full_dataset/dm-training-data'
+  timesteps: 1000
+  sampling_timesteps: 250
+  batch_size: 128
+  lr: 0.00001
+  train_num_steps: 250000
+  save_sample_every: 5000
+  gradient_accumulate_every: 1
+  save_loss_every: 1000
+  num_samples: 4
+  num_workers: 64
+  results_folder: './logs/model_full_05_from_milestone_init_multi_gpus_80gb_x4'
+  milestone: 'init'
