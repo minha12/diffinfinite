@@ -1,9 +1,0 @@
-
-features:
-  target__tfrec:
-    class_to_int:
-      Unknown: 0
-      Carcinoma: 1
-      Necrosis: 2
-      Tumor Stroma: 3
-      Others: 4
