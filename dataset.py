@@ -280,6 +280,7 @@ def import_dataset(
         force: bool = False,
         transform=None,
         config_file: str = None,
+        extra_data_path: str = None,  # Add this line
         **kwargs
 ):
     # Generate the dataset CSV file if it does not exist
@@ -291,10 +292,12 @@ def import_dataset(
     # Create the train and test datasets
     train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
                             subclasses=subclasses, cond_drop_prob=cond_drop_prob,
-                            transform=transform)
+                            transform=transform,
+                            extra_unknown_data_path=[extra_data_path])  # Add this line
     test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
                            subclasses=subclasses, cond_drop_prob=1.,
-                           transform=transform)
+                           transform=transform,
+                           extra_unknown_data_path=[extra_data_path])  # Add this line
 
     # Create the train and test data loaders
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)

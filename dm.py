@@ -621,6 +621,7 @@ class Trainer:
         convert_image_to = None,
         out_size=None,
         config_file = None,
+        extra_data_path = None,  # Add this line
     ):
         super().__init__()
 
@@ -660,7 +661,8 @@ class Trainer:
             train_loader, test_loader = import_dataset(data_folder,
                                                 batch_size=train_batch_size,   
                                                 transform=transform,
-                                                config_file=config_file)
+                                                config_file=config_file,
+                                                extra_data_path=extra_data_path)  # Add this line
 
             train_loader, test_loader = self.accelerator.prepare(train_loader,test_loader)
             self.dl = cycle(train_loader)

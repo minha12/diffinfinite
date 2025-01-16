@@ -24,3 +24,4 @@ dm:
   num_workers: 32
   results_folder: './logs/model_full_05_from_milestone_init_multi_gpus'
   milestone: 'init'
+  extra_data_path: '../pathology-datasets/DRSK/full_dataset/unconditional-data'

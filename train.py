@@ -30,6 +30,7 @@ def main(
         num_workers: int = 32,
         results_folder: str = './results/run_name',
         milestone: int = None,
+        extra_data_path: str = '../pathology-datasets/DRSK/full_dataset/unconditional-data',  # Add this line
 ):
     if config_file:
         print("Loading config from:", config_file)
@@ -52,7 +53,8 @@ def main(
                 gradient_accumulate_every=gradient_accumulate_every,
                 save_loss_every=save_loss_every, num_samples=num_samples,
                 num_workers=num_workers, results_folder=results_folder,
-                milestone=milestone
+                milestone=milestone,
+                extra_data_path=extra_data_path  # Add this line
             )
         )
 
@@ -93,7 +95,8 @@ def main(
         num_samples=config.dm.num_samples,
         num_workers=config.dm.num_workers,
         results_folder=config.dm.results_folder,
-        config_file=config_file  # Add this line to pass config_file
+        config_file=config_file,  # Add this line to pass config_file
+        extra_data_path=config.dm.extra_data_path  # Add this line
     )
 
     if config.dm.milestone:
