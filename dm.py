@@ -263,7 +263,8 @@ class GaussianDiffusion(nn.Module):
         beta_schedule = 'cosine',
         p2_loss_weight_gamma = 0., # p2 loss weight, from https://arxiv.org/abs/2204.00227 - 0 is equivalent to weight of 1 across time - 1. is recommended
         p2_loss_weight_k = 1,
-        ddim_sampling_eta = 1.
+        ddim_sampling_eta = 1.,
+        debug = False
     ):
         super().__init__()
         assert not (type(self) == GaussianDiffusion and model.channels != model.out_dim)
@@ -334,6 +335,8 @@ class GaussianDiffusion(nn.Module):
         # calculate p2 reweighting
 
         register_buffer('p2_loss_weight', (p2_loss_weight_k + alphas_cumprod / (1 - alphas_cumprod)) ** -p2_loss_weight_gamma)
+
+        self.debug = debug
 
     def predict_start_from_noise(self, x_t, t, noise):
         return (
@@ -559,6 +562,12 @@ class GaussianDiffusion(nn.Module):
             raise ValueError(f'invalid loss type {self.loss_type}')
 
     def p_losses(self, x_start, t, *, classes, noise = None):
+        if self.debug:
+            print("\n=== Diffusion Step Info [GaussianDiffusion.p_losses()] ===")
+            print(f"Input shape: {x_start.shape}")
+            print(f"Input dtype: {x_start.dtype}")
+            print(f"Timestep: {t}")
+            
         b, c, h, w = x_start.shape
         noise = default(noise, lambda: torch.randn_like(x_start))
 
@@ -585,6 +594,12 @@ class GaussianDiffusion(nn.Module):
         loss = self.loss_fn(model_out, target, reduction = 'none')
         loss = reduce(loss, 'b ... -> b (...)', 'mean')
         loss = loss * extract(self.p2_loss_weight, t, loss.shape)
+        
+        if self.debug:
+            print(f"=== Model Predictions [GaussianDiffusion.p_losses()] ===")
+            print(f"Predicted noise shape: {model_out.shape}")
+            print(f"Target noise shape: {target.shape}")
+            
         return loss.mean()
 
     def forward(self, img, *args, **kwargs):

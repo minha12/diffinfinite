@@ -280,12 +280,18 @@ def import_dataset(
         force: bool = False,
         transform=None,
         config_file: str = None,
-        extra_data_path: str = None,  # Add this line
-        **kwargs
+        extra_data_path: str = None,
+        debug: bool = False  # Add debug parameter
 ):
     # Generate the dataset CSV file if it does not exist
     if not os.path.exists(join(data_path, "dataset.csv")) or force:
         create_dataset_csv(data_path=data_path, threshold=threshold)
+
+    if debug:
+        print(f"\n=== Dataset Import [import_dataset()] ===")
+        print(f"Data path: {data_path}")
+        print(f"Batch size: {batch_size}")
+        print(f"Extra data path: {extra_data_path}")
 
     train_dict, test_dict = split_dataset(data_path, train_size=0.9, config_file=config_file)
 
@@ -293,18 +299,19 @@ def import_dataset(
     train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
                             subclasses=subclasses, cond_drop_prob=cond_drop_prob,
                             transform=transform,
-                            extra_unknown_data_path=[extra_data_path])  # Add this line
+                            extra_unknown_data_path=[extra_data_path],
+                            debug=debug)  # Pass debug flag
     test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
                            subclasses=subclasses, cond_drop_prob=1.,
                            transform=transform,
-                           extra_unknown_data_path=[extra_data_path])  # Add this line
+                           extra_unknown_data_path=[extra_data_path],
+                           debug=debug)  # Pass debug flag
 
     # Create the train and test data loaders
     train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     return train_loader, test_loader
-
 
 class DatasetLung(Dataset):
     def __init__(self,
@@ -313,8 +320,14 @@ class DatasetLung(Dataset):
             subclasses: list = None,
             cond_drop_prob: float = 0.5,
             extra_unknown_data_path: list = [],
-            transform = None):
+            transform = None,
+            debug: bool = False):  # Add debug parameter
 
+        self.debug = debug
+        if self.debug:
+            print(f"\n=== Dataset Init [DatasetLung.__init__()] ===")
+            for cls, samples in data_dict.items():
+                print(f"Class {cls}: {len(samples)} samples")
 
         for extra in extra_unknown_data_path:
             data_dict = add_unconditional(data_path=extra, 
@@ -326,28 +339,28 @@ class DatasetLung(Dataset):
         self.extra = extra_unknown_data_path
         self.data_dict = data_dict
         self.subclasses = subclasses
-        self.cutoffs = self._cutoffs(subclasses,cond_drop_prob)
+        self.cutoffs = self._cutoffs(subclasses, cond_drop_prob)
         self.N_classes = N_classes
         self.transform = transform
 
     def __repr__(self):
         rep = f"{type(self).__name__}: ImageFolderDataset[{self.__len__()}]"
-        for n, in range(self.N_classes):
+        for n in range(self.N_classes):
             rep += f'\nClass {n} has N samples: {len(self.data_dict[n])}\t'
         return rep
 
     def __len__(self):
-        counts=0
+        counts = 0
         for i in range(len(self.data_dict)):
-            counts+=len(self.data_dict[i])
+            counts += len(self.data_dict[i])
         return counts
 
     def _cutoffs(self, subclasses, cond_drop_prob=0.5):
         # Handle None or empty subclasses
         if not subclasses:
             return torch.tensor([1.0])  # Single cutoff
-        probs=[cond_drop_prob/(len(subclasses)+1) for n in range(len(subclasses)+1)]
-        probs.insert(0,1.-cond_drop_prob)
+        probs = [cond_drop_prob / (len(subclasses) + 1) for n in range(len(subclasses) + 1)]
+        probs.insert(0, 1. - cond_drop_prob)
         return torch.Tensor(probs).cumsum(dim=0)
 
     def unbalanced_data(self):
@@ -359,16 +372,16 @@ class DatasetLung(Dataset):
         # map the index to the appropriate tensor value using PyTorch indexing
         oneclass_data = self.data_dict[index.item()]
         # generate a random number in [0,1)
-        rand_num = (torch.rand(1)*len(oneclass_data)).int()
+        rand_num = (torch.rand(1) * len(oneclass_data)).int()
         # extract random img from the selected class
         core_path = oneclass_data[rand_num]
         # return img and mask path
-        img_path = join(self.data_path, core_path+'.jpg')
-        mask_path = join(self.data_path, core_path+'_mask.png')
+        img_path = join(self.data_path, core_path + '.jpg')
+        mask_path = join(self.data_path, core_path + '_mask.png')
 
         if not os.path.exists(img_path):
             for extra in self.extra:
-                extra_path = join(extra, core_path+'.jpg')
+                extra_path = join(extra, core_path + '.jpg')
                 if os.path.exists(extra_path):
                     img_path = extra_path
 
@@ -377,19 +390,35 @@ class DatasetLung(Dataset):
         if os.path.exists(mask_path):
             mask = Image.open(mask_path)
         else:
-            h,w,c=np.array(img).shape
-            mask=np.zeros((h,w,1)) 
+            h, w, c = np.array(img).shape
+            mask = np.zeros((h, w, 1))
 
-        return img,mask
+        if self.debug:
+            print(f"\n=== Data Loading [DatasetLung.unbalanced_data()] ===")
+            print(f"Current cutoff probabilities: {self.cutoffs}")
+            print(f"Selected class index: {index.item()}")
+            print(f"Loading image: {img_path}")
+            print(f"Original image size: {img.size}")
+            if os.path.exists(mask_path):
+                print(f"Mask size: {mask.size}")
+            else:
+                print("No mask found - using zero mask")
 
+        return img, mask
 
-    def __getitem__(self,idx):
-
+    def __getitem__(self, idx):
         img, mask = self.unbalanced_data()
 
         if self.transform is not None:
-            img,mask = self.transform((img,mask))
+            img, mask = self.transform((img, mask))
 
-        mask=(mask*255).int()
+            if self.debug and idx == 0:
+                print("\n=== Transformation Results [DatasetLung.__getitem__()] ===")
+                print(f"Image tensor shape: {img.shape}")
+                print(f"Image value range: [{img.min():.2f}, {img.max():.2f}]")
+                print(f"Mask tensor shape: {mask.shape}")
+                print(f"Unique mask values: {torch.unique(mask)}")
 
-        return img,mask
+        mask = (mask * 255).int()
+
+        return img, mask

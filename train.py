@@ -75,12 +75,33 @@ def main(
         block_per_layer=config.unet.block_per_layer,
     )
 
+    debug = config.dm.get('debug', False)
+    if debug:
+        print("\n=== Final Configuration [main()] ===")
+        print("UNet config:")
+        for k, v in vars(config.unet).items():
+            print(f"  {k}: {v}")
+        print("\nDiffusion config:")
+        for k, v in vars(config.dm).items():
+            print(f"  {k}: {v}")
+        
+        print("\n=== Model Summary [main()] ===")
+        total_params = sum(p.numel() for p in unet.parameters())
+        trainable_params = sum(p.numel() for p in unet.parameters() if p.requires_grad)
+        print(f"Total parameters: {total_params:,}")
+        print(f"Trainable parameters: {trainable_params:,}")
+        print(f"Input channels: {unet.channels}")
+        print(f"Number of classes: {unet.num_classes}")
+        print(f"Model dimension: {unet.dim}")
+        print(f"Dimension multipliers: {config.unet.dim_mults}")
+
     model = GaussianDiffusion(
         unet,
         image_size=z_size,
         timesteps=config.dm.timesteps,
         sampling_timesteps=config.dm.sampling_timesteps,
-        loss_type='l2'
+        loss_type='l2',
+        debug=debug
     )
 
     trainer = Trainer(
