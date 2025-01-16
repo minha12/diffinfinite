@@ -86,24 +86,31 @@ class RandomRotate90():  # Note: not the same as T.RandomRotation(90)
         return self.__class__.__name__
 
 
-def create_dataset_csv(data_path: str, threshold=0.3):
-    # Use a list comprehension to get all files in the directory ending in '.jpg'
+def create_dataset_csv(data_path: str, threshold=0.3, debug: bool = False):
+    if debug:
+        print(f"\n=== CSV Generation [create_dataset_csv()] ===")
+        print(f"Scanning directory: {data_path}")
+    
     files = [f for f in Path(data_path).iterdir() if f.name.endswith('jpg')]
-
-
-    imgs,labels=[],[]
+    imgs, labels = [], []
+    
     for f in files:
-        f_mask=str(f).replace('.jpg', '_mask.png')
-        mask=np.array(Image.open(f_mask))
+        f_mask = str(f).replace('.jpg', '_mask.png')
+        mask = np.array(Image.open(f_mask))
         if np.mean(mask > 0) > threshold:
             imgs.append(f.stem)
-            unique_labels = list(map(str, np.int32(np.unique(mask)) ))
+            unique_labels = list(map(str, np.int32(np.unique(mask))))
             labels.append(' '.join(unique_labels))
+            if debug:
+                print(f"Image: {f.stem}, Labels: {unique_labels}")
 
-    # Write the image names and labels to a CSV file using the csv.writer class
     with open(Path(data_path, "dataset.csv"), 'w', newline='') as csvfile:
         writer = csv.writer(csvfile)
         writer.writerows(zip(imgs, labels))
+    
+    if debug:
+        print(f"CSV file created at: {Path(data_path, 'dataset.csv')}")
+        print(f"Total images: {len(imgs)}")
 
 
 def remove_common_elements(train_set, test_set):
@@ -155,30 +162,32 @@ def get_label_map_filename(config_file: str) -> str:
     
     return f'label_map_{num_classes}.yml'
 
-def get_class_names(data_path: str = data_path, config_file: str = None):
+def get_class_names(data_path: str = data_path, config_file: str = None, debug: bool = False):
     if config_file:
         label_map_file = get_label_map_filename(config_file)
     else:
         label_map_file = 'label_map_5.yml'  # fallback default
     
-    # Open the YAML file
+    if debug:
+        print(f"\n=== Class Name Loading [get_class_names()] ===")
+        print(f"Loading label map file: {label_map_file}")
+
     try:
         with open(os.path.join(data_path, label_map_file), 'r') as file:
-            # Load the contents of the file
             contents = yaml.safe_load(file)
     except FileNotFoundError:
-        # Fallback to default if specific file not found
         with open(os.path.join(data_path, 'label_map_5.yml'), 'r') as file:
             contents = yaml.safe_load(file)
 
-    # Extract the class names and the number of classes
     class_dict = contents['classes']['class_to_int']
     class_names = [None] * len(class_dict)
     for name, idx in class_dict.items():
         if idx != 9:
             class_names[idx - (idx > 9)] = name
 
-    # Return all classes (remove the [:-1] slice)
+    if debug:
+        print(f"Class names: {class_names}")
+
     return class_names
 
 
@@ -211,40 +220,35 @@ def dataset_to_dict(data_path: str = data_path):
     return subsets
 
 
-def split_dataset(data_path: str = data_path, train_size: float = 0.9, config_file: str = None):
-    """
-    Splits a dataset into training and test sets, with each set containing data for each class.
-    :param data_path: the path to the dataset
-    :param train_size: the proportion of the data to use for training
-    :return: two dictionaries, one containing the training data and the other containing the test data
-    """
+def split_dataset(data_path: str = data_path, train_size: float = 0.9, config_file: str = None, debug: bool = False):
+    if debug:
+        print(f"\n=== Dataset Splitting [split_dataset()] ===")
+        print(f"Data path: {data_path}")
+        print(f"Train size: {train_size}")
 
-    # Create a dictionary that maps class names to their corresponding data
     subset_dict = dataset_to_dict(data_path)
-
-    # Determine the number of classes and create a list of subclasses
     classes = get_class_names(data_path, config_file=config_file)
     num_classes = len(classes)
     subclasses = list(range(num_classes))
 
-    # Create empty dictionaries to hold the training and test data for each subclass
     train_set, test_set = {}, {}
     for i in subclasses:
         train_set[i], test_set[i] = [], []
 
-    # Split the data for each class into training and test sets
     for i in range(num_classes):
         class_set = subset_dict[i]
         class_counts = len(class_set)
 
-        if class_counts>1:
-            # Split the data using the specified train/test ratio
+        if class_counts > 1:
             train_index, test_index = train_test_split(
-                                            torch.linspace(0, class_counts - 1, class_counts), 
-                                            train_size=train_size)
-            # Add the training and test data to the corresponding dictionary
+                torch.linspace(0, class_counts - 1, class_counts), 
+                train_size=train_size)
             train_set[i] += [class_set[j] for j in train_index.int()]
             test_set[i] += [class_set[j] for j in test_index.int()]
+
+    if debug:
+        print(f"Train set summary: {[len(train_set[i]) for i in range(num_classes)]}")
+        print(f"Test set summary: {[len(test_set[i]) for i in range(num_classes)]}")
 
     return train_set, test_set
 
@@ -285,7 +289,7 @@ def import_dataset(
 ):
     # Generate the dataset CSV file if it does not exist
     if not os.path.exists(join(data_path, "dataset.csv")) or force:
-        create_dataset_csv(data_path=data_path, threshold=threshold)
+        create_dataset_csv(data_path=data_path, threshold=threshold, debug=debug)
 
     if debug:
         print(f"\n=== Dataset Import [import_dataset()] ===")
@@ -293,7 +297,7 @@ def import_dataset(
         print(f"Batch size: {batch_size}")
         print(f"Extra data path: {extra_data_path}")
 
-    train_dict, test_dict = split_dataset(data_path, train_size=0.9, config_file=config_file)
+    train_dict, test_dict = split_dataset(data_path, train_size=0.9, config_file=config_file, debug=debug)
 
     # Create the train and test datasets
     train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
@@ -411,14 +415,12 @@ class DatasetLung(Dataset):
 
         if self.transform is not None:
             img, mask = self.transform((img, mask))
-
+            mask = (mask * 255).int()
             if self.debug and idx == 0:
                 print("\n=== Transformation Results [DatasetLung.__getitem__()] ===")
                 print(f"Image tensor shape: {img.shape}")
                 print(f"Image value range: [{img.min():.2f}, {img.max():.2f}]")
                 print(f"Mask tensor shape: {mask.shape}")
                 print(f"Unique mask values: {torch.unique(mask)}")
-
-        mask = (mask * 255).int()
 
         return img, mask
