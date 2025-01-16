@@ -4,7 +4,7 @@ from PIL import Image
 import numpy as np
 
 # Specify the directory containing the mask images
-mask_dir = 'images/inpainting/'
+mask_dir = '../images/inpainting/'
 
 # Get a list of all files in the directory
 file_list = os.listdir(mask_dir)
@@ -38,13 +38,13 @@ from PIL import Image
 import numpy as np
 
 # Specify the directory containing the mask images
-mask_dir = '../pathology-datasets/DRSK/image_patches_512_20x/masks'
+mask_dir = '../../pathology-datasets/DRSK/full_dataset/dm-training-data'
 
 # Get a list of all files in the directory
 file_list = os.listdir(mask_dir)
 
 # Filter for files ending with '.png'
-mask_files = [f for f in file_list if f.endswith('.png')]
+mask_files = [f for f in file_list if f.endswith('_mask.png')]
 
 # Check if there are any mask files
 if not mask_files:
@@ -79,7 +79,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Load the first mask ---
-mask_dir1 = 'images/inpainting/'
+mask_dir1 = '../images/inpainting/'
 file_list1 = os.listdir(mask_dir1)
 mask_files1 = [f for f in file_list1 if f.endswith(('_mask.png', '.png'))] # Adjust suffix if needed
 if mask_files1:
@@ -98,7 +98,7 @@ else:
     mask1 = None
 
 # --- Load the second mask ---
-mask_dir2 = '../pathology-datasets/DRSK/image_patches_512_20x/masks'
+mask_dir2 = '../../pathology-datasets/DRSK/full_dataset/dm-training-data'
 file_list2 = os.listdir(mask_dir2)
 mask_files2 = [f for f in file_list2 if f.endswith('.png')]
 if mask_files2:
@@ -193,9 +193,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # --- Load the first image ---
-image_dir1 = 'images/inpainting/'
+image_dir1 = '../images/inpainting/'
 file_list1 = os.listdir(image_dir1)
-image_files1 = [f for f in file_list1 if f.endswith('.jpg')]
+image_files1 = [f for f in file_list1 if f.endswith('_mask.png')]
 if image_files1:
     image_filename1 = random.choice(image_files1)
     image_path1 = os.path.join(image_dir1, image_filename1)
@@ -211,9 +211,10 @@ else:
     image1 = None
 
 # --- Load the second image ---
-image_dir2 = '../pathology-datasets/DRSK/image_patches_512_20x/images'
+# image_dir2 = '../../pathology-datasets/DRSK/full_dataset/dm-training-data'
+image_dir2 = '../logs/model_full_05'
 file_list2 = os.listdir(image_dir2)
-image_files2 = [f for f in file_list2 if f.endswith('.png')]
+image_files2 = [f for f in file_list2 if f.startswith('masks-')]
 if image_files2:
     image_filename2 = random.choice(image_files2)
     image_path2 = os.path.join(image_dir2, image_filename2)
