@@ -16,3 +16,4 @@ train_*
 images_list.txt
 .vscode/
 .pytest_cache/
+__pycache__/
