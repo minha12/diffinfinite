@@ -66,13 +66,17 @@ class Unet(nn.Module):
     ):
         super().__init__()
 
+        # Store instance attributes
+        self.num_classes = num_classes
+        self.dim = dim
+        self.channels = channels
+
         # classifier free guidance stuff
 
         self.cond_drop_prob = cond_drop_prob
 
         # determine dimensions
 
-        self.channels = channels
         input_channels = channels
 
         init_dim = default(init_dim, dim)
@@ -155,6 +159,9 @@ class Unet(nn.Module):
 
         self.final_res_block = block_klass(dim * 2, dim, time_emb_dim = time_dim, classes_emb_dim = classes_dim)
         self.final_conv = nn.Conv2d(dim, self.out_dim, 1)
+
+        # Add this line to store num_classes as instance attribute
+        self.num_classes = num_classes
 
     def forward_with_cond_scale(
         self,
@@ -636,9 +643,13 @@ class Trainer:
         convert_image_to = None,
         out_size=None,
         config_file = None,
-        extra_data_path = None,  # Add this line
+        extra_data_path = None,
+        debug = False,  # Add debug parameter
     ):
         super().__init__()
+
+        # Store debug flag as instance attribute
+        self.debug = debug
 
         # 1. Initialize accelerator before model creation
         self.accelerator = Accelerator(
@@ -677,7 +688,8 @@ class Trainer:
                                                 batch_size=train_batch_size,   
                                                 transform=transform,
                                                 config_file=config_file,
-                                                extra_data_path=extra_data_path)  # Add this line
+                                                extra_data_path=extra_data_path,
+                                                debug=debug)  # Pass debug flag
 
             train_loader, test_loader = self.accelerator.prepare(train_loader,test_loader)
             self.dl = cycle(train_loader)
@@ -760,6 +772,25 @@ class Trainer:
         self.model, self.opt, self.ema, self.scheduler = self.accelerator.prepare(self.model, self.opt, self.ema, self.scheduler)
             
     def train_loop(self, imgs, masks):
+        if self.debug:
+            print("\n=== Training Loop Image Details [Trainer.train_loop()] ===")
+            print(f"Input images metadata:")
+            print(f"  Shape: {imgs.shape}")
+            print(f"  Dtype: {imgs.dtype}")
+            print(f"  Device: {imgs.device}")
+            print(f"  Value range: [{imgs.min():.2f}, {imgs.max():.2f}]")
+            print(f"  Mean: {imgs.mean():.2f}")
+            print(f"  Std: {imgs.std():.2f}")
+            print(f"\nInput masks metadata:")
+            print(f"  Shape: {masks.shape}")
+            print(f"  Dtype: {masks.dtype}")
+            print(f"  Device: {masks.device}")
+            print(f"  Unique values: {torch.unique(masks).tolist()}")
+            print(f"  Value counts:")
+            unique, counts = torch.unique(masks, return_counts=True)
+            for val, count in zip(unique, counts):
+                print(f"    {val}: {count}")
+
         # Move VAE encoding outside of the training loop
         with torch.no_grad():
             vae = self.accelerator.unwrap_model(self.vae)
@@ -812,6 +843,24 @@ class Trainer:
                     utils.save_image(test_samples, 
                                  str(self.results_folder / f'sample-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))
+                    
+                    if self.debug:
+                        print("\n=== Generated Samples Details [Trainer.eval_loop()] ===")
+                        print(f"Test images metadata:")
+                        print(f"  Shape: {test_images.shape}")
+                        print(f"  Dtype: {test_images.dtype}")
+                        print(f"  Device: {test_images.device}")
+                        print(f"  Value range: [{test_images.min():.2f}, {test_images.max():.2f}]")
+                        print(f"\nTest masks metadata:")
+                        print(f"  Shape: {test_masks.shape}")
+                        print(f"  Dtype: {test_masks.dtype}")
+                        print(f"  Device: {test_masks.device}")
+                        print(f"  Unique values: {torch.unique(test_masks).tolist()}")
+                        print(f"\nGenerated samples metadata:")
+                        print(f"  Shape: {test_samples.shape}")
+                        print(f"  Dtype: {test_samples.dtype}")
+                        print(f"  Device: {test_samples.device}")
+                        print(f"  Value range: [{test_samples.min():.2f}, {test_samples.max():.2f}]")
                     
                     self.save(milestone)
 

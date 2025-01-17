@@ -330,6 +330,7 @@ class DatasetLung(Dataset):
         self.debug = debug
         if self.debug:
             print(f"\n=== Dataset Init [DatasetLung.__init__()] ===")
+            print(f"Data path: {data_path}")
             for cls, samples in data_dict.items():
                 print(f"Class {cls}: {len(samples)} samples")
 
@@ -398,15 +399,27 @@ class DatasetLung(Dataset):
             mask = np.zeros((h, w, 1))
 
         if self.debug:
-            print(f"\n=== Data Loading [DatasetLung.unbalanced_data()] ===")
-            print(f"Current cutoff probabilities: {self.cutoffs}")
-            print(f"Selected class index: {index.item()}")
-            print(f"Loading image: {img_path}")
-            print(f"Original image size: {img.size}")
+            print(f"\n=== Image Loading Details [DatasetLung.unbalanced_data()] ===")
+            print(f"Image path: {img_path}")
+            img_array = np.array(img)
+            print(f"Image metadata:")
+            print(f"  Shape: {img_array.shape}")
+            print(f"  Dtype: {img_array.dtype}")
+            print(f"  Value range: [{img_array.min()}, {img_array.max()}]")
+            print(f"  Mean: {img_array.mean():.2f}")
+            print(f"  Std: {img_array.std():.2f}")
             if os.path.exists(mask_path):
-                print(f"Mask size: {mask.size}")
+                mask_array = np.array(mask)
+                print(f"\nMask metadata:")
+                print(f"  Shape: {mask_array.shape}")
+                print(f"  Dtype: {mask_array.dtype}")
+                print(f"  Unique values: {np.unique(mask_array)}")
+                print(f"  Value counts:")
+                unique, counts = np.unique(mask_array, return_counts=True)
+                for val, count in zip(unique, counts):
+                    print(f"    {val}: {count}")
             else:
-                print("No mask found - using zero mask")
+                print("\nNo mask found - using zero mask")
 
         return img, mask
 
@@ -417,10 +430,22 @@ class DatasetLung(Dataset):
             img, mask = self.transform((img, mask))
             mask = (mask * 255).int()
             if self.debug and idx == 0:
-                print("\n=== Transformation Results [DatasetLung.__getitem__()] ===")
-                print(f"Image tensor shape: {img.shape}")
-                print(f"Image value range: [{img.min():.2f}, {img.max():.2f}]")
-                print(f"Mask tensor shape: {mask.shape}")
-                print(f"Unique mask values: {torch.unique(mask)}")
+                print("\n=== Transformed Image Details [DatasetLung.__getitem__()] ===")
+                print(f"Image tensor metadata:")
+                print(f"  Shape: {img.shape}")
+                print(f"  Dtype: {img.dtype}")
+                print(f"  Device: {img.device}")
+                print(f"  Value range: [{img.min():.2f}, {img.max():.2f}]")
+                print(f"  Mean: {img.mean():.2f}")
+                print(f"  Std: {img.std():.2f}")
+                print(f"\nMask tensor metadata:")
+                print(f"  Shape: {mask.shape}")
+                print(f"  Dtype: {mask.dtype}")
+                print(f"  Device: {mask.device}")
+                print(f"  Unique values: {torch.unique(mask).tolist()}")
+                print(f"  Value counts:")
+                unique, counts = torch.unique(mask, return_counts=True)
+                for val, count in zip(unique, counts):
+                    print(f"    {val}: {count}")
 
         return img, mask

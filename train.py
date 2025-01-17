@@ -75,7 +75,7 @@ def main(
         block_per_layer=config.unet.block_per_layer,
     )
 
-    debug = config.dm.get('debug', False)
+    debug = getattr(config.dm, 'debug', False)
     if debug:
         print("\n=== Final Configuration [main()] ===")
         print("UNet config:")
@@ -117,7 +117,8 @@ def main(
         num_workers=config.dm.num_workers,
         results_folder=config.dm.results_folder,
         config_file=config_file,  # Add this line to pass config_file
-        extra_data_path=config.dm.extra_data_path  # Add this line
+        extra_data_path=config.dm.extra_data_path,  # Add this line
+        debug=getattr(config.dm, 'debug', False)  # Add this line
     )
 
     if config.dm.milestone:
