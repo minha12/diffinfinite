@@ -14,15 +14,16 @@ dm:
   data_folder: '../pathology-datasets/DRSK/full_dataset/labeled-data'
   timesteps: 1000
   sampling_timesteps: 250
-  batch_size: 16
+  batch_size: 4
   lr: 0.0001
-  train_num_steps: 10
+  train_num_steps: 2
   save_sample_every: 2
   gradient_accumulate_every: 1
+  save_milestone_every: 1000
   save_loss_every: 2
   num_samples: 4
   num_workers: 16
-  results_folder: './logs/model_full_05_from_milestone_init_multi_gpus'
-  milestone: None
+  results_folder: './logs/short_test'
+  milestone: null
   extra_data_path: '../pathology-datasets/DRSK/full_dataset/unconditional-data'
   debug: true  # Add this line
