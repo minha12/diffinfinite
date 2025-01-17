@@ -1,0 +1,2181 @@
+/home/x_lemin/.conda/envs/diffinf/lib/python3.10/site-packages/diffusers/models/modeling_utils.py:107: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location="cpu")
+/home/x_lemin/.conda/envs/diffinf/lib/python3.10/site-packages/transformers/modeling_utils.py:446: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  return torch.load(checkpoint_file, map_location="cpu")
+Loading config from: config/test.yaml
+
+=== Final Configuration [main()] ===
+UNet config:
+  image_size: 512
+  dim: 256
+  num_classes: 5
+  dim_mults: [1, 2, 4]
+  channels: 4
+  resnet_block_groups: 2
+  block_per_layer: 2
+
+Diffusion config:
+  data_folder: ../pathology-datasets/DRSK/full_dataset/labeled-data
+  timesteps: 1000
+  sampling_timesteps: 250
+  batch_size: 16
+  lr: 0.0001
+  train_num_steps: 2
+  save_sample_every: 2
+  gradient_accumulate_every: 1
+  save_loss_every: 2
+  num_samples: 4
+  num_workers: 16
+  results_folder: ./logs/model_full_05_from_milestone_init_multi_gpus
+  milestone: None
+  extra_data_path: ../pathology-datasets/DRSK/full_dataset/unconditional-data
+  debug: True
+
+=== Model Summary [main()] ===
+Total parameters: 172,101,124
+Trainable parameters: 172,101,124
+Input channels: 4
+Number of classes: 5
+Model dimension: 256
+Dimension multipliers: [1, 2, 4]
+
+=== Dataset Import [import_dataset()] ===
+Data path: ../pathology-datasets/DRSK/full_dataset/labeled-data
+Batch size: 16
+Extra data path: ../pathology-datasets/DRSK/full_dataset/unconditional-data
+
+=== Dataset Splitting [split_dataset()] ===
+Data path: ../pathology-datasets/DRSK/full_dataset/labeled-data
+Train size: 0.9
+Train set summary: [58389, 58041, 38244, 36493, 41360]
+Test set summary: [6488, 6450, 4250, 4055, 4596]
+
+=== Dataset Init [DatasetLung.__init__()] ===
+Data path: ../pathology-datasets/DRSK/full_dataset/labeled-data
+Class 0: 58389 samples
+Class 1: 58041 samples
+Class 2: 38244 samples
+Class 3: 36493 samples
+Class 4: 41360 samples
+
+=== Dataset Init [DatasetLung.__init__()] ===
+Data path: ../pathology-datasets/DRSK/full_dataset/labeled-data
+Class 0: 6488 samples
+Class 1: 6450 samples
+Class 2: 4250 samples
+Class 3: 4055 samples
+Class 4: 4596 samples
+  0%|          | 0/2 [00:00<?, ?it/s]loss: 2.1624:   0%|          | 0/2 [00:02<?, ?it/s]loss: 2.1624:  50%|█████     | 1/2 [00:02<00:02,  2.43s/it]loss: 3.6349:  50%|█████     | 1/2 [00:03<00:02,  2.43s/it]loss: 3.6349: 100%|██████████| 2/2 [00:17<00:00,  9.71s/it]loss: 3.6349: 100%|██████████| 2/2 [00:17<00:00,  8.62s/it]
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/eb13b238dd252a5a63e480867ad9eaf6bef498800ecc8e9fdf323b3eb8328009.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [1, 255]
+  Mean: 195.37
+  Std: 55.32
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/b64bb7d7384de61cac2c61e9eb4cf3a18a7f638ca3c6296497f26c032788f1cf.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [7, 255]
+  Mean: 184.90
+  Std: 47.79
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/4c284e633fbb7c31599c6503d48bc8641790e0f9c1c70d07505f0e357b935a41.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 129.95
+  Std: 68.67
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/c95702be8d7ab800bb4c00d8e395cd13e14573d79c63204585346ce4d50ee381.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 192.30
+  Std: 47.97
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 2 3 4]
+  Value counts:
+    0: 1
+    2: 257690
+    3: 557
+    4: 3896
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/8ccaf4f413ac80e72967b29cfda3984b2ade8653e52906edf5c21432b8d065ef.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [31, 255]
+  Mean: 196.23
+  Std: 36.86
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1]
+  Value counts:
+    0: 228547
+    1: 33597
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/e995df9a118b03ca36fefb93d1d0c36a9a60a41869c1f02d4c96d26309e97623.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 160.63
+  Std: 50.10
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/805833497ef641394f3ed32ee2bae511aea02bd7b262511b6001b3c9c11abcb4.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [15, 255]
+  Mean: 185.33
+  Std: 36.93
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/6faa8195cc2b26df2f4b5ee9f9acf5df9b77737832e37f0989c277ff1453642b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 158.43
+  Std: 52.15
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1]
+  Value counts:
+    0: 255204
+    1: 6940
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/90b1a323498cc8cc074a05600934d8d23f3264066159a3c3df3018ae9ae6dcca.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [20, 255]
+  Mean: 199.91
+  Std: 46.14
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 36682
+    1: 695
+    2: 207152
+    3: 956
+    4: 16659
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/cfddd731a66956195783f21d6622019bb1d7814b0ece95961b254a2e0ea2ca0b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 194.72
+  Std: 41.55
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/29996b2a2800b00e79b642ccc0629f8a47b8a77a52eb9f1b84fb9bfd371aec1e.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 100.90
+  Std: 62.74
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/0c757bd0388ba832af17c568a393e0088cc7d5551d568c8805ce0810b573cfee.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 206.73
+  Std: 44.54
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/17a05f333e4a0eef508bf3dc977b02aa8bb0e0d752dcc4f1ee158e0beb09000f.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 212.00
+  Std: 44.81
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 2400
+    1: 86543
+    2: 287
+    3: 2404
+    4: 170510
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/06c7b8ffe53d1474ad5b041062f266a3c0d7a91050b1db589b074ee5191ae5e7.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 153.12
+  Std: 68.93
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 1112
+    1: 245901
+    2: 214
+    3: 693
+    4: 14224
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/e0d0277b646e18f180cf0d21c3f93f4eee7617631bf5aa3b73110fae727f3c16.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 167.42
+  Std: 59.05
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/7f29ee5b778bb060b08b67830259dc6422b1ce71d92759f7e044bb348b2a2718.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [22, 255]
+  Mean: 212.65
+  Std: 40.90
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 710
+    1: 144
+    2: 900
+    3: 2081
+    4: 258309
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/cc2b1213aba9b29fbead7c6d9a1e4d11c98dde9dd834c9afb2437264b39ff542.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 199.75
+  Std: 52.87
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/b4f98783ad9dbc9ab4f31c57a13a78e5bcdd43c1a56cf41f876d50652080e9b8.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [4, 255]
+  Mean: 193.50
+  Std: 52.01
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/8ce48d4c954388482ba031db854ca14bff97e0394b06660056d5509bed95ae2b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [5, 255]
+  Mean: 183.73
+  Std: 58.81
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/8a1d386a7a49e43982f1d7f2618fbff6fa56516b0ed93cc6de0207362c1928e5.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [16, 255]
+  Mean: 198.42
+  Std: 40.66
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 175
+    1: 32
+    2: 212
+    3: 590
+    4: 261135
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/eae6289201ec16fcd5ff00182df5fd0cc725a1ed57da71fce606f3e30affcff1.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 210.08
+  Std: 44.12
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/6d397eed2b285c2e7baa99adc2aa8625637dd73de39eb351dc0d9ded67f7af3f.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [1, 255]
+  Mean: 129.54
+  Std: 54.09
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/fca308e73c784197ee8764a0619fca5c0846c0d8983e932ecc8ce33c669f9b3f.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 167.34
+  Std: 53.54
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 2670
+    1: 520
+    2: 125632
+    3: 2553
+    4: 130769
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/91a2644c5d0607325a12e70ee5b00cb104168bb69cd4cba66fca7d5833284cc3.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [16, 255]
+  Mean: 172.93
+  Std: 41.41
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/669cf50063b8624435c902f6987b3c0f8ca3847bef2d57414360380439dd43eb.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [7, 255]
+  Mean: 176.45
+  Std: 48.71
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1]
+  Value counts:
+    0: 239311
+    1: 22833
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/0a23671930e7b537cf3d7795e097612fdb203afd236d1b5d06159b10b3f41ef9.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [11, 255]
+  Mean: 221.09
+  Std: 28.59
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/ce370236103060bb135b899e1a6471b753487ef65f3bcc27d8c52393bcce0885.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [17, 255]
+  Mean: 214.19
+  Std: 39.23
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/3027a7fd817c2a749de46314721a4735a0bba3488f5c5807c607b9e6140ef196.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 149.54
+  Std: 51.24
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/cd50299e80505a5a79911c1907d676c7fb7c6390341074181e533dc7d4ebe189.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [2, 255]
+  Mean: 197.70
+  Std: 44.82
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/d6a7ce00df11a39fb9494c4fea82e4eb136e97aa41f32decd605de3f55192b3b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [21, 255]
+  Mean: 222.63
+  Std: 34.93
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/96af86ef5d6b230863fa4c9f3dd1f9d9fb2b06043a31760fdfb7925398b76fba.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [1, 255]
+  Mean: 176.59
+  Std: 45.93
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/198042bdc7fe5a443c67db13bcea3ffe1ccb753a8f84adb3b98a07fd9c9508a0.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [27, 255]
+  Mean: 164.42
+  Std: 37.98
+
+No mask found - using zero mask
+
+=== Training Loop Image Details [Trainer.train_loop()] ===
+Input images metadata:
+  Shape: torch.Size([16, 3, 512, 512])
+  Dtype: torch.float32
+  Device: cuda:0
+  Value range: [0.00, 1.00]
+  Mean: 0.70
+  Std: 0.23
+
+Input masks metadata:
+  Shape: torch.Size([16, 1, 512, 512])
+  Dtype: torch.int32
+  Device: cuda:0
+  Unique values: [0, 1, 2, 3, 4]
+  Value counts:
+    0: 2883952
+    1: 373820
+    2: 466243
+    3: 6691
+    4: 463598
+
+=== Diffusion Step Info [GaussianDiffusion.p_losses()] ===
+Input shape: torch.Size([16, 4, 64, 64])
+Input dtype: torch.float32
+Timestep: tensor([ 76,  69, 180, 563, 225, 936,  87, 628, 415, 368, 464, 559, 248, 508,
+         99, 912], device='cuda:0')
+Size of masks: torch.Size([16, 1, 512, 512])
+Size of classes: torch.Size([16, 5])
+Size of classes_emb: torch.Size([16, 256])
+Size of c: torch.Size([16, 1024])
+=== Model Predictions [GaussianDiffusion.p_losses()] ===
+Predicted noise shape: torch.Size([16, 4, 64, 64])
+Target noise shape: torch.Size([16, 4, 64, 64])
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/8533ea84c1ec018266be594798a1b2618dc2574a6fc88ba86e4109622a34fd37.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 208.89
+  Std: 46.64
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 1244
+    1: 49818
+    2: 386
+    3: 2352
+    4: 208344
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/6ea7f0f403d1ba590445c6f407d372b45238309866b649cf39077f87c3f030d8.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 143.54
+  Std: 68.10
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/80021da7c556888eefe3a932720b97ef2ec42561e9184b5dabcebabaa059a24d.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 191.20
+  Std: 46.97
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/db0679e221e9e1b3d787c9b037f5a70c8cb60318f107409c3bee04aa3160e23f.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [6, 255]
+  Mean: 204.61
+  Std: 48.85
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/3da5c4fd6954e80e26139f7378675924ec215de4199daf648174c4628bfcd939.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 142.94
+  Std: 55.08
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/53d7467c4742f57521cea762823a248a437021e6a0ce27ed495ff9b384661f1e.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [10, 255]
+  Mean: 213.52
+  Std: 38.89
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/765caa29f8f5b2815e8d7949e5e20ad5c2c56670b59bb191ac8e1561d5e0f872.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 177.73
+  Std: 58.26
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 696
+    1: 146
+    2: 243657
+    3: 1966
+    4: 15679
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/6a3e7f1abc11f48270b546b4f80f0b32524aea12c01991bfdc07b96bbef124fb.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [3, 255]
+  Mean: 196.30
+  Std: 47.66
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 27174
+    1: 1332
+    2: 462
+    3: 1142
+    4: 232034
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/a9d43ccfc68d7442d50b07effe7a06201ddfd3c3ca029ea65cda276fea6c9561.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [7, 255]
+  Mean: 182.89
+  Std: 49.73
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1]
+  Value counts:
+    0: 250029
+    1: 12115
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/ed77e4d2c523403e6e3c03b0221d92edc72089f1d4d23d001ab1d516189bb8f4.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [2, 255]
+  Mean: 184.66
+  Std: 51.30
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1 2 3 4]
+  Value counts:
+    0: 1904
+    1: 6476
+    2: 225719
+    3: 5060
+    4: 22985
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/b5b5bee41cdbd52d305c3e70fe668f14131c99f48c716145e2331053dfd46bde.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [7, 255]
+  Mean: 209.04
+  Std: 41.09
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/b6c9988e4f0d8936df287c8b349cbee46daab81e713a0e091adcbdec26cca82b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [13, 255]
+  Mean: 179.28
+  Std: 38.64
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/2a299d074a055aa19f1f2103388f5c867992972df09057cde51c8fb4bd18648e.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 146.32
+  Std: 54.70
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/labeled-data/6197f8ffa11ff8ccc140ce162d8acf8eb5ef3adeee69117bdcef91d0facd4a9b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 169.09
+  Std: 59.67
+
+Mask metadata:
+  Shape: (512, 512)
+  Dtype: uint8
+  Unique values: [0 1]
+  Value counts:
+    0: 223242
+    1: 38902
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/3749e885d4ccf95505a4d739d34d6ce0242ea8df7b52ba7b671e11d281b0874a.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 112.82
+  Std: 47.66
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/bb82d4ee02aba38b836994a4f83ce7c0e28c0062cdd086e0f59b58a0228323e7.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 159.97
+  Std: 51.99
+
+No mask found - using zero mask
+
+=== Training Loop Image Details [Trainer.train_loop()] ===
+Input images metadata:
+  Shape: torch.Size([16, 3, 512, 512])
+  Dtype: torch.float32
+  Device: cuda:0
+  Value range: [0.00, 1.00]
+  Mean: 0.73
+  Std: 0.21
+
+Input masks metadata:
+  Shape: torch.Size([16, 1, 512, 512])
+  Dtype: torch.int32
+  Device: cuda:0
+  Unique values: [0, 1, 2, 3, 4]
+  Value counts:
+    0: 3650028
+    1: 23385
+    2: 125844
+    3: 3143
+    4: 391904
+
+=== Diffusion Step Info [GaussianDiffusion.p_losses()] ===
+Input shape: torch.Size([16, 4, 64, 64])
+Input dtype: torch.float32
+Timestep: tensor([898, 566, 516, 613, 396, 970,  44, 438, 355, 733, 197, 952, 622, 327,
+        687, 317], device='cuda:0')
+Size of masks: torch.Size([16, 1, 512, 512])
+Size of classes: torch.Size([16, 5])
+Size of classes_emb: torch.Size([16, 256])
+Size of c: torch.Size([16, 1024])
+=== Model Predictions [GaussianDiffusion.p_losses()] ===
+Predicted noise shape: torch.Size([16, 4, 64, 64])
+Target noise shape: torch.Size([16, 4, 64, 64])
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/fbfdc448819fda0b9be7758ecd21ad0ac4c99b6d0b2eb3648779209a08f15ea4.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [21, 255]
+  Mean: 192.06
+  Std: 34.09
+
+No mask found - using zero mask
+
+=== Transformed Image Details [DatasetLung.__getitem__()] ===
+Image tensor metadata:
+  Shape: torch.Size([3, 512, 512])
+  Dtype: torch.float32
+  Device: cpu
+  Value range: [0.08, 1.00]
+  Mean: 0.75
+  Std: 0.13
+
+Mask tensor metadata:
+  Shape: torch.Size([1, 512, 512])
+  Dtype: torch.int32
+  Device: cpu
+  Unique values: [0]
+  Value counts:
+    0: 262144
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/30b9c1d85243ddbe11d78b6c4e93d862b12b1387546d4b081cde65a68e879d07.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 187.06
+  Std: 47.27
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/f93645fa21aa77a22156219cb321c9dbd098eadded0b686d34a0c8ec4117783e.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [3, 255]
+  Mean: 176.13
+  Std: 49.82
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/4be2ffba3748c4489e0cf4c44a163c7a36af7ec0db352bc11e8c04447cde9c49.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 108.45
+  Std: 54.03
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/a7f9d71b79028e28ecca390e7a7ad41b1f5897e09c5ca1b0980b235146bf95d4.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 150.58
+  Std: 48.77
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/f94424ba5b9bd0ee7afbf3636a6f266bebe92097b8847d384b1bf592a09847a3.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [12, 255]
+  Mean: 202.36
+  Std: 44.41
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/3e3b7471eb0437e83044763434c78fd6785304e06c906afc8317f5a3232ace3a.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [13, 255]
+  Mean: 222.56
+  Std: 27.89
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/235bf1cc58aa9ee91bafabf579890b18ce284d0f5c58b947b126db1d6f7293a7.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [2, 255]
+  Mean: 178.60
+  Std: 50.16
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/1f1c4b3285dae37175c8ed620591fb76931543e5f4efec11a7688de17ef38a10.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [10, 255]
+  Mean: 216.59
+  Std: 46.13
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/2db6737ebd64acd1d2e562393a1de270b0917c932cc9242d7af97104fd86a9ad.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [9, 255]
+  Mean: 182.81
+  Std: 41.84
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/d520928e1a074e9181ad9375c3ea8e2df2960c431d2498709e23a522bd8f563b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [9, 255]
+  Mean: 182.21
+  Std: 43.88
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/292187d7f2d3574dbca9ac27d55d94f5c7c8e4b5c52b27cede2637638c95e733.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 177.41
+  Std: 57.09
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/b9b466c8477ec7750f50dae943e0da885395cff0d39c08ce9f6a1b68e4491f8a.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [22, 255]
+  Mean: 202.70
+  Std: 36.20
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/5b44a928c8da8d8bf8fd1d56077b86620091c92357e9f4d4d6f1da8d57d16a98.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [3, 255]
+  Mean: 172.24
+  Std: 41.28
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/452da0220ea4371d3505c0f7aef2a95809df29c593d1f450adbb947523d39a17.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 141.78
+  Std: 62.19
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/1ad325683bb5fa0b637f8d9189842be45478f0fb6de93aabeee472bffb8f0529.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [22, 255]
+  Mean: 198.41
+  Std: 34.85
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/af8834c1511e2a2ad6b2050e56616a9b7d07be9b3202a5d443918508394e8032.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [4, 255]
+  Mean: 169.57
+  Std: 54.86
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/3136a8c93890cbffcd57b9ea767ea30da309bc066ecad62d2be2903f3a29f8f2.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [1, 255]
+  Mean: 148.82
+  Std: 52.64
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/74f1d0a372156e31193398c829fe329192f48e886b48d8627621cea5ee546d0c.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 172.61
+  Std: 64.79
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/3009e4a0db465b37560b8948afcbd0a0c81d7407f239163eaadac2e86cd45abb.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [8, 255]
+  Mean: 204.59
+  Std: 40.00
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/89b62c66d4f9f201002d2cba964a867591ce4ac98740b3d42caee60b9cf91e9e.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [12, 255]
+  Mean: 197.39
+  Std: 47.59
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/d749b66b052d3b4830cbf4d4d2d2e328f297d6cfd71209018f005ca53104394c.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [9, 255]
+  Mean: 188.93
+  Std: 35.42
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/bba626e42764e0a6018f462ae78fc258f201ddbaad36ee0533b1cde12d03e78e.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 130.94
+  Std: 54.90
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/08d38a7fc8992a1ba6e0b98dbcad4d133757e771c7f4c7bda1dc568c086da62e.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 96.60
+  Std: 62.27
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/397263211f176d03369ba7b9cfd0724bae26b0ce58fca96bc572be37d2fe6311.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 122.90
+  Std: 57.46
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/031363a6def2b35f9d9bada2a3bafd6d4b0bdd1b3f53b50c02b2048a8a306074.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 107.79
+  Std: 68.72
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/9fe5c2f235feba58c04a6465a44238eaed94d9c8d7086893966e02a718ee562b.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 157.25
+  Std: 69.35
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/bc042c9a8857a5c9e8daa3b7e26ba0ce0174199aad2d7412f4899cff85df3b65.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 158.00
+  Std: 62.25
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/a16615dc38908afc51e561e54fd80604509fd1d7e1b4da61dd3560bdb348af74.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [7, 255]
+  Mean: 179.48
+  Std: 37.65
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/8596dff60fb8bc3b374dc75d30073c17e1bf302ff6164e181c8f832e034e33a8.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 126.28
+  Std: 74.77
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/b553d62e9c28c1cda77f0eb0564fc4cc118c3154996c5a17cb8e56d491ac9ea8.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [8, 255]
+  Mean: 213.09
+  Std: 38.40
+
+No mask found - using zero mask
+
+=== Image Loading Details [DatasetLung.unbalanced_data()] ===
+Image path: ../pathology-datasets/DRSK/full_dataset/unconditional-data/216412d084b5d28d35550db26b41ba8f65512d48c8ccc8434c06310906e5672f.jpg
+Image metadata:
+  Shape: (512, 512, 3)
+  Dtype: uint8
+  Value range: [0, 255]
+  Mean: 180.49
+  Std: 58.18
+
+No mask found - using zero mask
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+Size of masks: torch.Size([4, 1, 64, 64])
+Size of classes: torch.Size([4, 5])
+Size of classes_emb: torch.Size([4, 256])
+Size of c: torch.Size([4, 1024])
+
+=== Generated Samples Details [Trainer.eval_loop()] ===
+Test images metadata:
+  Shape: torch.Size([16, 3, 512, 512])
+  Dtype: torch.float32
+  Device: cuda:0
+  Value range: [0.00, 1.00]
+
+Test masks metadata:
+  Shape: torch.Size([16, 1, 512, 512])
+  Dtype: torch.int32
+  Device: cuda:0
+  Unique values: [0]
+
+Generated samples metadata:
+  Shape: torch.Size([4, 3, 512, 512])
+  Dtype: torch.float32
+  Device: cuda:0
+  Value range: [0.00, 0.21]
+training complete
