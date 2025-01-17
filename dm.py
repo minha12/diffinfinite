@@ -33,6 +33,11 @@ from utils.modules import *
 
 from diffusers import DiffusionPipeline
 
+from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
+import io
+from torchvision.transforms import ToTensor
+from PIL import Image
 
 # Constants
 
@@ -652,6 +657,7 @@ class Trainer:
         out_size=None,
         config_file = None,
         extra_data_path = None,
+        norm_scale = 0.18215 , # Standard SD scaling (1/50)
         debug = False,  # Add debug parameter
     ):
         super().__init__()
@@ -683,7 +689,7 @@ class Trainer:
         self.train_num_steps = train_num_steps
         self.image_size = diffusion_model.image_size
         self.cond_scale = cond_scale
-
+        self.norm_scale = norm_scale
         if data_folder:
             transform=ComposeState([
                         T.ToTensor(),
@@ -799,11 +805,10 @@ class Trainer:
             for val, count in zip(unique, counts):
                 print(f"    {val}: {count}")
 
-        scale = 0.18215  # Standard SD scaling
         # Move VAE encoding outside of the training loop
         with torch.no_grad():
             vae = self.accelerator.unwrap_model(self.vae)
-            imgs = vae.encode(imgs).latent_dist.sample() * scale #correct scale
+            imgs = vae.encode(imgs).latent_dist.sample() * self.norm_scale #correct scale
 
         with self.accelerator.autocast():
             loss = self.model(img=imgs, classes=masks)
@@ -818,15 +823,65 @@ class Trainer:
 
         return loss
     
+    def save_colored_masks(self, masks, save_path, nrow):  # Add self parameter
+        """Convert masks to colored visualization and save as image."""
+        # Define colors for different mask values (adjust colors as needed)
+        colors = {
+            0: '#000000',  # black
+            1: '#3b4cc0',  # blue
+            2: '#518abf',  # light blue
+            3: '#62b7bf',  # cyan
+            4: '#71e3bd'   # turquoise
+        }
+        
+        # Calculate grid dimensions
+        n_samples = masks.shape[0]
+        n_rows = int(math.sqrt(n_samples))
+        n_cols = math.ceil(n_samples / n_rows)
+        
+        # Create figure with subplots
+        fig, axs = plt.subplots(n_rows, n_cols, figsize=(4*n_cols, 4*n_rows))
+        if n_rows == 1 and n_cols == 1:
+            axs = np.array([[axs]])
+        elif n_rows == 1 or n_cols == 1:
+            axs = axs.reshape(n_rows, n_cols)
+        
+        # Plot each mask
+        for idx in range(n_samples):
+            row = idx // n_cols
+            col = idx % n_cols
+            
+            # Create colormap from unique values in mask
+            unique_values = torch.unique(masks[idx])
+            cmap = ListedColormap([colors[val.item()] for val in unique_values])
+            
+            # Plot mask
+            axs[row, col].imshow(masks[idx, 0].cpu().detach(), cmap=cmap)
+            axs[row, col].axis('off')
+        
+        # Remove empty subplots
+        for idx in range(n_samples, n_rows * n_cols):
+            row = idx // n_cols
+            col = idx % n_cols
+            try:
+                fig.delaxes(axs[row, col])
+            except:
+                pass
+        
+        # Save plot to file
+        plt.tight_layout()
+        plt.savefig(save_path)
+        plt.close()
+
     def eval_loop(self):
         if self.accelerator.is_main_process:
             # Get unwrapped models
-            unwrapped_model = self.accelerator.unwrap_model(self.model)
+            
             unwrapped_ema = self.accelerator.unwrap_model(self.ema)
             
             unwrapped_ema.to(self.accelerator.device)
             unwrapped_ema.update()
-            scale = 0.18215  # Standard SD scaling
+
             if self.step != 0 and self.step % self.save_and_sample_every == 0:
                 # No need to unwrap ema_model again since we already have it unwrapped
                 unwrapped_ema.ema_model.eval()
@@ -837,17 +892,17 @@ class Trainer:
                     
                     # Unwrap VAE model as before
                     vae = self.accelerator.unwrap_model(self.vae)
-                    z = vae.encode(test_images[:self.num_samples]).latent_dist.sample() * scale # correct scale
-                    z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples]) / scale  # correct scale  
+                    z = vae.encode(test_images[:self.num_samples]).latent_dist.sample() * self.norm_scale # correct scale
+                    z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples]) / self.norm_scale  # correct scale  
                     test_samples = torch.clip(vae.decode(z).sample, 0, 1)
                     
                     utils.save_image(test_images[:self.num_samples], 
                                  str(self.results_folder / f'images-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))   
-                    normalized_masks = (test_masks / 255.0).clamp(0, 1)
-                    utils.save_image(normalized_masks.float()[:self.num_samples], 
-                                 str(self.results_folder / f'masks-{milestone}.png'), 
-                                 nrow = int(math.sqrt(self.num_samples)))         
+                    
+                    self.save_colored_masks(test_masks[:self.num_samples], 
+                               str(self.results_folder / f'masks-{milestone}.png'), 
+                               nrow = int(math.sqrt(self.num_samples)))         
                     
                     utils.save_image(test_samples, 
                                  str(self.results_folder / f'sample-{milestone}.png'), 
