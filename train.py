@@ -59,7 +59,7 @@ def main(
                 extra_data_path=extra_data_path  # Add this line
             )
         )
-
+    debug = getattr(config.dm, 'debug', False)
     # Modified dim_mults handling to support both string and list inputs
     if isinstance(config.unet.dim_mults, str):
         dim_mults = [int(mult) for mult in config.unet.dim_mults.split(' ')]
@@ -75,9 +75,10 @@ def main(
         channels=config.unet.channels,
         resnet_block_groups=config.unet.resnet_block_groups,
         block_per_layer=config.unet.block_per_layer,
+        debug=debug
     )
 
-    debug = getattr(config.dm, 'debug', False)
+    
     if debug:
         print("\n=== Final Configuration [main()] ===")
         print("UNet config:")
