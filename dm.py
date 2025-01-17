@@ -799,10 +799,11 @@ class Trainer:
             for val, count in zip(unique, counts):
                 print(f"    {val}: {count}")
 
+        scale = 0.18215  # Standard SD scaling
         # Move VAE encoding outside of the training loop
         with torch.no_grad():
             vae = self.accelerator.unwrap_model(self.vae)
-            imgs = vae.encode(imgs).latent_dist.sample() / 50  # Removed /50
+            imgs = vae.encode(imgs).latent_dist.sample() * scale #correct scale
 
         with self.accelerator.autocast():
             loss = self.model(img=imgs, classes=masks)
@@ -825,7 +826,7 @@ class Trainer:
             
             unwrapped_ema.to(self.accelerator.device)
             unwrapped_ema.update()
-
+            scale = 0.18215  # Standard SD scaling
             if self.step != 0 and self.step % self.save_and_sample_every == 0:
                 # No need to unwrap ema_model again since we already have it unwrapped
                 unwrapped_ema.ema_model.eval()
@@ -836,8 +837,8 @@ class Trainer:
                     
                     # Unwrap VAE model as before
                     vae = self.accelerator.unwrap_model(self.vae)
-                    z = vae.encode(test_images[:self.num_samples]).latent_dist.sample() / 50  # Removed /50
-                    z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples]) * 50  
+                    z = vae.encode(test_images[:self.num_samples]).latent_dist.sample() * scale # correct scale
+                    z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples]) / scale  # correct scale  
                     test_samples = torch.clip(vae.decode(z).sample, 0, 1)
                     
                     utils.save_image(test_images[:self.num_samples], 
