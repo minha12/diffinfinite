@@ -200,10 +200,10 @@ class Unet(nn.Module):
         c = self.classes_mlp(weighted_emb)
 
         # Add debug prints
-        print(f"Size of masks: {masks.size()}")
-        print(f"Size of classes: {class_dist.size()}")
-        print(f"Size of classes_emb: {weighted_emb.size()}")
-        print(f"Size of c: {c.size()}")
+        # print(f"Size of masks: {masks.size()}")
+        # print(f"Size of classes: {class_dist.size()}")
+        # print(f"Size of classes_emb: {weighted_emb.size()}")
+        # print(f"Size of c: {c.size()}")
         
         # Continue with rest of forward pass...
         x = self.init_conv(x)
