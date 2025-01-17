@@ -794,7 +794,7 @@ class Trainer:
         # Move VAE encoding outside of the training loop
         with torch.no_grad():
             vae = self.accelerator.unwrap_model(self.vae)
-            imgs = vae.encode(imgs).latent_dist.sample() / 50
+            imgs = vae.encode(imgs).latent_dist.sample()  # Removed /50
 
         with self.accelerator.autocast():
             loss = self.model(img=imgs, classes=masks)
@@ -828,8 +828,8 @@ class Trainer:
                     
                     # Unwrap VAE model as before
                     vae = self.accelerator.unwrap_model(self.vae)
-                    z = vae.encode(test_images[:self.num_samples]).latent_dist.sample() / 50
-                    z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples]) * 50
+                    z = vae.encode(test_images[:self.num_samples]).latent_dist.sample()  # Removed /50
+                    z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples])  # No *50 needed
                     test_samples = torch.clip(vae.decode(z).sample, 0, 1)
                     
                     utils.save_image(test_images[:self.num_samples], 
