@@ -180,26 +180,34 @@ class Unet(nn.Module):
         null_logits = self.forward(*args, **kwargs)
         return null_logits + (logits - null_logits) * cond_scale
 
-    def forward(
-        self,
-        x,
-        time,
-        classes
-    ):
+    def forward(self, x, time, classes):
         batch, device = x.shape[0], x.device
+        
+        # Keep original masks for attention layers
+        masks = classes.clone()
+        
+        # Calculate class distribution
+        class_dist = torch.zeros((batch, self.num_classes), device=device)
+        for c in range(self.num_classes):
+            class_mask = (classes == c).float()
+            class_dist[:, c] = class_mask.mean(dim=(1,2,3))
+        
+        # Get embeddings using distribution
+        classes_emb = self.classes_emb(torch.arange(self.num_classes, device=device))  # [num_classes, dim]
+        weighted_emb = (classes_emb[None, :, :] * class_dist[:, :, None]).sum(1)  # [batch, dim]
+        
+        # Process through existing MLP
+        c = self.classes_mlp(weighted_emb)
 
-        # derive condition, with condition dropout for classifier free guidance        
-
-        masks=classes.clone()
-        classes=(torch.max(classes.reshape(classes.shape[0],-1),-1).values).int()
-        classes_emb = self.classes_emb(classes)
-        c = self.classes_mlp(classes_emb)
-
-        # unet
-
+        # Add debug prints
+        print(f"Size of masks: {masks.size()}")
+        print(f"Size of classes: {class_dist.size()}")
+        print(f"Size of classes_emb: {weighted_emb.size()}")
+        print(f"Size of c: {c.size()}")
+        
+        # Continue with rest of forward pass...
         x = self.init_conv(x)
         r = x.clone()
-
         t = self.time_mlp(time)
 
         h = []
