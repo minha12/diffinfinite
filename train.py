@@ -24,6 +24,7 @@ def main(
         lr: float = 1e-4,
         train_num_steps: int = 250000,
         save_sample_every: int = 25000,
+        save_milestone_every: int = 10000,  # Add this line
         gradient_accumulate_every: int = 1,
         save_loss_every: int = 100,
         num_samples: int = 4,
@@ -50,6 +51,7 @@ def main(
                 sampling_timesteps=sampling_timesteps, batch_size=batch_size,
                 lr=lr, train_num_steps=train_num_steps,
                 save_sample_every=save_sample_every,
+                save_milestone_every=save_milestone_every,  # Add this line
                 gradient_accumulate_every=gradient_accumulate_every,
                 save_loss_every=save_loss_every, num_samples=num_samples,
                 num_workers=num_workers, results_folder=results_folder,
@@ -111,14 +113,15 @@ def main(
         train_lr=config.dm.lr,
         train_num_steps=config.dm.train_num_steps,
         save_and_sample_every=config.dm.save_sample_every,
+        save_milestone_every=config.dm.save_milestone_every,  # Add this line
         gradient_accumulate_every=config.dm.gradient_accumulate_every,
         save_loss_every=config.dm.save_loss_every,
         num_samples=config.dm.num_samples,
         num_workers=config.dm.num_workers,
         results_folder=config.dm.results_folder,
-        config_file=config_file,  # Add this line to pass config_file
-        extra_data_path=config.dm.extra_data_path,  # Add this line
-        debug=getattr(config.dm, 'debug', False)  # Add this line
+        config_file=config_file,
+        extra_data_path=config.dm.extra_data_path,
+        debug=getattr(config.dm, 'debug', False)
     )
 
     if config.dm.milestone:
