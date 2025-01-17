@@ -309,7 +309,7 @@ def import_dataset(
             T.ToTensor(),  # Only convert to tensor, no augmentations
         ])
     test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
-                           subclasses=subclasses, cond_drop_prob=1.,
+                           subclasses=subclasses, cond_drop_prob=1.0,
                            transform=test_transform,
                            extra_unknown_data_path=[extra_data_path],
                            debug=debug)  # Pass debug flag
@@ -342,13 +342,13 @@ class DatasetLung(Dataset):
                                           data_dict=data_dict, no_check=True)
 
         N_classes = len(data_dict)
-
+        self.N_classes = N_classes
         self.data_path = data_path
         self.extra = extra_unknown_data_path
         self.data_dict = data_dict
         self.subclasses = subclasses
         self.cutoffs = self._cutoffs(subclasses, cond_drop_prob)
-        self.N_classes = N_classes
+        
         self.transform = transform
 
     def __repr__(self):
@@ -364,16 +364,51 @@ class DatasetLung(Dataset):
         return counts
 
     def _cutoffs(self, subclasses, cond_drop_prob=0.5):
-        # Handle None or empty subclasses
+        """
+        Calculate cutoff probabilities for class sampling.
+        When subclasses=None, distribute cond_drop_prob across all classes.
+        """
         if not subclasses:
-            return torch.tensor([1.0])  # Single cutoff
+            # Calculate probabilities
+            num_classes = self.N_classes
+            # First prob is unconditional (class 0)
+            probs = [1.0 - cond_drop_prob]
+            # Distribute remaining probability across classes
+            class_prob = cond_drop_prob / (num_classes - 1)  # -1 because class 0 is unconditional
+            probs.extend([class_prob] * (num_classes - 1))
+            
+            # Convert to cumulative probabilities
+            cutoff_probs = torch.tensor(probs).cumsum(dim=0)
+            
+            if self.debug:
+                print(f"\n=== Cutoff Probabilities [DatasetLung._cutoffs()] ===")
+                print(f"Number of classes: {num_classes}")
+                print(f"Conditional drop probability: {cond_drop_prob}")
+                print(f"Individual probabilities: {probs}")
+                print(f"Cutoff probabilities: {cutoff_probs.tolist()}")
+                
+            return cutoff_probs
+            
+        # Original code for when subclasses is specified
         probs = [cond_drop_prob / (len(subclasses) + 1) for n in range(len(subclasses) + 1)]
         probs.insert(0, 1. - cond_drop_prob)
-        return torch.Tensor(probs).cumsum(dim=0)
+        cutoff_probs = torch.tensor(probs).cumsum(dim=0)
+        
+        if self.debug:
+            print(f"\n=== Cutoff Probabilities [DatasetLung._cutoffs()] ===")
+            print(f"Subclasses: {subclasses}")
+            print(f"Conditional drop probability: {cond_drop_prob}")
+            print(f"Individual probabilities: {probs}")
+            print(f"Cutoff probabilities: {cutoff_probs.tolist()}")
+            
+        return cutoff_probs
 
     def unbalanced_data(self):
         # generate a random number in [0,1)
         rand_num = torch.rand(1)
+        if self.debug:
+            print(f"\n=== Data Selection Details [DatasetLung.unbalanced_data()] ===")
+            print(f"Selected rand num: {rand_num.item()}")
         # find the index of the interval that the random number falls into
         index = torch.sum(rand_num >= self.cutoffs)
         self.tmp_index = index
@@ -381,6 +416,12 @@ class DatasetLung(Dataset):
         oneclass_data = self.data_dict[index.item()]
         # generate a random number in [0,1)
         rand_num = (torch.rand(1) * len(oneclass_data)).int()
+        
+        if self.debug:
+            print(f"Selected class index: {index.item()}")
+            print(f"Class size: {len(oneclass_data)}")
+            print(f"Selected sample index: {rand_num.item()}")
+            
         # extract random img from the selected class
         core_path = oneclass_data[rand_num]
         # return img and mask path

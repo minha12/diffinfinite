@@ -68,6 +68,7 @@ class Unet(nn.Module):
         learned_sinusoidal_cond = False,
         random_fourier_features = False,
         learned_sinusoidal_dim = 16,
+        debug = False,  # Add debug parameter
     ):
         super().__init__()
 
@@ -75,7 +76,7 @@ class Unet(nn.Module):
         self.num_classes = num_classes
         self.dim = dim
         self.channels = channels
-
+        self.debug = debug
         # classifier free guidance stuff
 
         self.cond_drop_prob = cond_drop_prob
@@ -205,10 +206,14 @@ class Unet(nn.Module):
         c = self.classes_mlp(weighted_emb)
 
         # Add debug prints
-        # print(f"Size of masks: {masks.size()}")
-        # print(f"Size of classes: {class_dist.size()}")
-        # print(f"Size of classes_emb: {weighted_emb.size()}")
-        # print(f"Size of c: {c.size()}")
+        if self.debug:
+            print(f"Size of masks: {masks.size()}")
+            print(f"Size of class_dist: {class_dist.size()}")
+            print((f"Value of classes distribution: {class_dist}" ))
+            print(f"Size of weighted_emb: {weighted_emb.size()}")
+            print(f"Size of classes_emb: {classes_emb.size()}")
+            print(f"Size of c: {c.size()}")
+            print(f"Value of c: {c}")
         
         # Continue with rest of forward pass...
         x = self.init_conv(x)
@@ -829,11 +834,11 @@ class Trainer:
         """Convert masks to colored visualization and save as image."""
         # Define colors for different mask values (adjust colors as needed)
         colors = {
-            0: '#000000',  # black
-            1: '#3b4cc0',  # blue
-            2: '#518abf',  # light blue
-            3: '#62b7bf',  # cyan
-            4: '#71e3bd'   # turquoise
+            0: '#FFFFFF',  # white
+            1: '#FFA500',  # orange
+            2: '#00FFFF',  # cyan
+            3: '#FF0000',  # red
+            4: '#008000'   # green
         }
         
         # Calculate grid dimensions
