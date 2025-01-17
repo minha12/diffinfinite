@@ -305,9 +305,12 @@ def import_dataset(
                             transform=transform,
                             extra_unknown_data_path=[extra_data_path],
                             debug=debug)  # Pass debug flag
+    test_transform = ComposeState([
+            T.ToTensor(),  # Only convert to tensor, no augmentations
+        ])
     test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
                            subclasses=subclasses, cond_drop_prob=1.,
-                           transform=transform,
+                           transform=test_transform,
                            extra_unknown_data_path=[extra_data_path],
                            debug=debug)  # Pass debug flag
 

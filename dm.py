@@ -645,6 +645,7 @@ class Trainer:
         ema_decay = 0.995,
         adam_betas = (0.9, 0.99),
         save_and_sample_every = 1000,
+        save_milestone_every = 10000,  # Add this line
         save_loss_every = 100,
         num_workers = 0,
         num_samples = 4,
@@ -681,6 +682,7 @@ class Trainer:
         assert has_int_squareroot(num_samples), 'number of samples must have an integer square root'
         self.num_samples = num_samples
         self.save_and_sample_every = save_and_sample_every
+        self.save_milestone_every = save_milestone_every  # Add this line
         self.save_loss_every = save_loss_every
 
         self.batch_size = train_batch_size
@@ -926,7 +928,9 @@ class Trainer:
                         print(f"  Device: {test_samples.device}")
                         print(f"  Value range: [{test_samples.min():.2f}, {test_samples.max():.2f}]")
                     
-                    self.save(milestone)
+                    # Only save model checkpoint at milestone intervals
+                    if self.step % self.save_milestone_every == 0:
+                        self.save(milestone)
 
     def train(self):
 
