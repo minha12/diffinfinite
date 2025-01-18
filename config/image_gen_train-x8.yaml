@@ -14,15 +14,15 @@ dm:
   data_folder: '../pathology-datasets/DRSK/full_dataset/labeled-data'
   timesteps: 1000
   sampling_timesteps: 250
-  batch_size: 64
+  batch_size: 128
   lr: 0.0001
-  train_num_steps: 100000
-  save_sample_every: 100
-  save_milestone_every: 5000
-  gradient_accumulate_every: 2
+  train_num_steps: 250000
+  save_sample_every: 500
+  save_milestone_every: 10000
+  gradient_accumulate_every: 1
   save_loss_every: 1000
   num_samples: 4
-  num_workers: 64
-  results_folder: './logs/drsk_512x256_5class_20240118_1932'
+  num_workers: 128
+  results_folder: './logs/drsk_512x256_5class_20240118_1917'
   milestone: null
   extra_data_path: '../pathology-datasets/DRSK/full_dataset/unconditional-data'
