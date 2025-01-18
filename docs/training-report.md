@@ -10,6 +10,7 @@
 - Training Steps: 100,000
 - Sampling Timesteps: 250/1000
 - Gradient Accumulation: 2
+- Latent Normalizing Scale: 1/50
 - Model Architecture:
   - Channels: 4
   - Dimension Multipliers: [1, 2, 4]
@@ -40,7 +41,7 @@ The loss curve shows steady convergence over training steps, with notable observ
     <img src="../logs/drsk_512x256_5class_20240119_1118/sample-25.png" width="30%">
 </div>
 
-### Step 5000 (Final)
+### Step 5000 
 <div style="display: flex; justify-content: space-between;">
     <img src="../logs/drsk_512x256_5class_20240119_1118/images-50.png" width="30%">
     <img src="../logs/drsk_512x256_5class_20240119_1118/masks-50.png" width="30%">
