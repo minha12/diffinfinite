@@ -1,131 +1,224 @@
-Let's analyze the provided segmentation mask data to determine the best way to reduce the number of classes to 4 or 9 for training your diffusion model.
+# Class Distribution Analysis
 
-**Understanding the Data**
+![Full Class Distribution](./pixel_class_percentages.png)
 
-First, let's categorize the existing labels to understand the underlying tissue types and conditions being annotated:
+## Original Class Distribution Overview
 
-* **Normal Tissue Components:**
-    * Dermis (with and without surgical margin)
-    * Epidermis (with and without surgical margin)
-    * Pilosebaceous apparatus structure (with and without surgical margin)
-    * Skin appendage structure (with and without surgical margin)
-    * Subcutaneous tissue (with and without surgical margin)
-    * Perichondrium (with and without surgical margin)
-    * Structure of cartilage of auditory canal (with and without surgical margin)
-* **Abnormal Conditions (Neoplastic and Non-Neoplastic):**
-    * Basal cell carcinoma
-    * Squamous cell carcinoma (including in situ and Keratoacanthoma variants)
-    * Malignant melanoma (including in situ and Lentigo maligna melanoma)
-    * Actinic keratosis
-    * Dermatofibroma
-    * Dysplastic nevus
-    * Compound nevus
-    * Granuloma
-    * Inflammation
-    * Inflammatory edema
-    * Neurofibroma
-    * Reactive cellular changes
-    * Scar
-    * Seborrheic keratosis
-* **Other:**
-    * Artifact
-    * Tissue Unknown
-    * Surgical Margin (as a modifier to other tissue types)
+The original dataset shows significant class imbalance with:
+- Dominant class: tissue_unknown (74.01%)
+- Major normal tissue classes:
+  * Dermis_Normal skin (6.13%)
+  * Skin appendage structure_Normal skin (2.00%)
+  * Subcutaneous tissue_Normal skin (1.96%)
+- Significant pathological classes:
+  * Dermis_Abnormal, Reactive cellular changes (4.68%)
+  * Background (3.37%)
+  * Artifact_Artifact (0.92%)
+- Many rare classes (<0.1% each):
+  * Various types of inflammation
+  * Specific carcinomas
+  * Specialized structures
+- Ultra-rare classes (<0.001%):
+  * Multiple "Unknown" categories (labels 55-73)
 
-**Observations and Challenges**
+This distribution presents challenges for model training, necessitating strategic class grouping to create more balanced categories while maintaining clinical relevance.
 
-* **Class Imbalance:**  A significant portion of the data is labeled as "tissue_unknown" (38.97%). This needs careful consideration.
-* **Sparsity of Specific Abnormalities:** Many specific abnormal conditions have 0% coverage. These individual classes are unlikely to be learned effectively by the model.
-* **"Surgical Margin" as a Context:** The "Surgical margin" label is often appended to other tissue types. This indicates the location of the tissue rather than a distinct tissue type itself.
-* **Overlapping/Nested Labels:** Some labels combine multiple conditions (e.g., "Dermis_Abnormal, Inflammation, Basal cell carcinoma").
+# Class Groupings
 
-**Strategies for Reducing Classes**
+This document describes how the original classes are grouped into reduced class sets for different classification scenarios.
 
-**Key Principle:** Group classes based on semantic similarity and prevalence. Prioritize retaining information about major tissue types and significant abnormalities.
+## 5-Class Grouping
+```bash
+5-Class Distribution:
+------------------------------
+Class 0 (Unknown): 74.01%
+Class 1 (Background/Artifact): 4.29%
+Class 2 (Inflammatory/Reactive): 5.62%
+Class 3 (Carcinoma): 2.27%
+Class 4 (Normal Tissue): 13.81%
+```
+### Distribution and Detailed Mapping
+1. **Unknown (Class 0) - 74.01%**
+   - Original tissue_unknown
 
-**Option 1: Reducing to 4 Classes**
+2. **Background/Artifact (Class 1) - 4.29%**
+   - Original background
+   - Artifact_Artifact
 
-This requires significant aggregation. Here's a potential grouping strategy:
+3. **Inflammatory/Reactive (Class 2) - 5.62%**
+   - Dermis_Abnormal, Inflammation
+   - Dermis_Abnormal, Inflammation with BCC/Fibrosis/SCC
+   - Epidermis_Abnormal, Inflammatory edema
+   - Dermis_Abnormal, Reactive cellular changes
+   - Subcutaneous tissue_Abnormal, Reactive
 
-1. **Normal Tissue:**  Combine all labels explicitly indicating normal tissue components. This would include:
-    * `Dermis_Normal skin`
-    * `Epidermis_Normal skin`
-    * `Pilosebaceous apparatus structure_Normal skin`
-    * `Skin appendage structure_Normal skin`
-    * `Subcutaneous tissue_Normal skin`
-    * `Perichondrium_Normal skin`
-    * `Structure of cartilage of auditory canal_Normal skin`
-    * *Consider including the "Surgical margin" variants of these normal tissues here, as the underlying tissue is still normal.*
+4. **Carcinoma (Class 3) - 2.27%**
+   - Dermis/Epidermis_SCC variants
+   - Basal cell carcinoma
+   - Benign fibrous histiocytoma
+   - Compound/Dysplastic nevus
+   - Dermatofibroma
+   - Granuloma
+   - Malignant melanoma variants
+   - Neurofibroma
+   - Scar tissue
+   - Seborrheic keratosis
+   - Actinic keratosis
 
-2. **Abnormal Tissue:** Combine all labels indicating any form of abnormality or disease. This would include:
-    * All labels containing "Abnormal"
-    * Specific cancer types (Basal cell carcinoma, Squamous cell carcinoma, Malignant melanoma, etc.)
-    * Inflammation, Reactive cellular changes, Scar, etc.
+5. **Normal Tissue (Class 4) - 13.81%**
+   - Normal Dermis
+   - Normal Epidermis
+   - Normal Perichondrium
+   - Normal Pilosebaceous apparatus
+   - Normal Skin appendages
+   - Normal Structure of cartilage
+   - Normal Subcutaneous tissue
+   - All corresponding surgical margin variants
 
-3. **Artifacts:** Keep this as a separate class:
-    * `Artifact_Artifact`
+## 10-Class Grouping
 
-4. **Unknown:** Keep this as a separate class for now:
-    * `tissue_unknown`
+```bash
+10-Class Distribution:
+------------------------------
+Class 0 (Unknown): 74.03%
+Class 1 (Background): 3.37%
+Class 2 (Artifacts): 0.92%
+Class 3 (Carcinoma): 1.45%
+Class 4 (Normal Dermis): 7.65%
+Class 5 (Normal Epidermis): 0.60%
+Class 6 (Normal Appendages): 5.56%
+Class 7 (Inflammatory): 0.88%
+Class 8 (Reactive): 4.73%
+Class 9 (Structural): 0.80%
+```
 
-**Rationale for 4 Classes:**
+### Distribution and Detailed Mapping
+1. **Unknown (Class 0) - 74.03%**
+   - Original tissue_unknown
+   - Various unclassified abnormal conditions
 
-* **Simplicity:** This is the most aggressive reduction, making the learning task simpler initially.
-* **Focus on Broad Categories:** It distinguishes between healthy tissue, diseased tissue, artifacts, and unclassified areas.
+2. **Background (Class 1) - 3.37%**
+   - Original background regions
 
-**Considerations for 4 Classes:**
+3. **Artifacts (Class 2) - 0.92%**
+   - Artifact_Artifact
 
-* **Loss of Granularity:**  Significant information about specific abnormalities is lost.
-* **"tissue_unknown":**  The large "tissue_unknown" class might be problematic. Consider if it can be further analyzed or if it should be treated as a separate category of "unlabeled" or "background" depending on its nature.
+4. **Carcinoma (Class 3) - 1.45%**
+   - All SCC variants
+   - All BCC variants
+   - Malignant melanoma variants
+   - Actinic keratosis
 
-**Option 2: Reducing to 9 Classes**
+5. **Normal Dermis (Class 4) - 7.65%**
+   - Dermis_Normal skin
+   - Dermis_Normal skin, Surgical margin
 
-This allows for more nuanced groupings. Here's a potential strategy:
+6. **Normal Epidermis (Class 5) - 0.60%**
+   - Epidermis_Normal skin
+   - Epidermis_Normal skin, Surgical margin
 
-1. **Normal Dermis:**
-    * `Dermis_Normal skin`
-    * `Dermis_Normal skin, Surgical margin`
+7. **Normal Appendages (Class 6) - 5.56%**
+   - Normal Perichondrium
+   - Normal Pilosebaceous apparatus
+   - Normal Skin appendages
+   - Normal Structure of cartilage
+   - Normal Subcutaneous tissue
+   - All corresponding surgical margin variants
 
-2. **Normal Epidermis:**
-    * `Epidermis_Normal skin`
-    * `Epidermis_Normal skin, Surgical margin`
+8. **Inflammatory (Class 7) - 0.88%**
+   - Pure inflammatory conditions
+   - Inflammatory edema
+   - Inflammation with BCC/SCC
 
-3. **Normal Appendages:** Combine normal pilosebaceous and skin appendage structures:
-    * `Pilosebaceous apparatus structure_Normal skin`
-    * `Pilosebaceous apparatus structure_Normal skin, Surgical margin`
-    * `Skin appendage structure_Normal skin`
-    * `Skin appendage structure_Normal skin, Surgical margin`
+9. **Reactive (Class 8) - 4.73%**
+   - Reactive cellular changes
+   - Subcutaneous reactive changes
 
-4. **Normal Subcutaneous Tissue:**
-    * `Subcutaneous tissue_Normal skin`
-    * `Subcutaneous tissue_Normal skin, Surgical margin`
+10. **Structural (Class 9) - 0.80%**
+    - Benign fibrous histiocytoma
+    - Compound/Dysplastic nevus
+    - Dermatofibroma
+    - Granuloma
+    - Neurofibroma
+    - Scar tissue
+    - Seborrheic keratosis
 
-5. **Basal Cell Carcinoma (BCC):** Group all labels containing "Basal cell carcinoma":
-    * `"Dermis_Abnormal, Basal cell carcinoma"`
-    * `"Epidermis_Abnormal, Basal cell carcinoma"`
-    * `"Dermis_Abnormal, Inflammation, Basal cell carcinoma"`
+# Class Groupings Rationale
 
-6. **Squamous Cell Carcinoma (SCC) / Keratoacanthoma:** Group labels related to SCC:
-    * `"Dermis_, Squamous cell carcinoma, Keratoacanthoma"`
-    * `"Epidermis_, Squamous cell carcinoma, Keratoacanthoma"`
-    * `"Dermis_Abnormal, Squamous cell carcinoma"`
-    * `"Dermis_Abnormal, Squamous cell carcinoma in situ"`
-    * `"Dermis_Abnormal, Squamous cell carcinoma, Inflammation"`
-    * `"Epidermis_Abnormal, Squamous cell carcinoma in situ"`
-    * `"Dermis_Abnormal, Inflammation, Squamous cell carcinoma, Keratoacanthoma"`
+## 5-Class System Rationale
 
-7. **Reactive Cellular Changes / Inflammation:** Group these related non-neoplastic changes:
-    * `"Dermis_Abnormal, Reactive cellular changes"`
-    * `"Dermis_Abnormal, Reactive cellular changes, Surgical margin"`
-    * `"Dermis_Abnormal, Inflammation"`
-    * `"Dermis_Abnormal, Inflammation, Fibrosis"`
-    * `"Dermis_Abnormal, Inflammation, fibrosis"`
-    * `"Epidermis_Abnormal, Inflammatory edema"`
-    * `"Dermis_Abnormal, Inflammatory edema"`
+The 5-class grouping system balances clinical relevance with class distribution:
 
-8. **Artifacts:**
-    * `Artifact_Artifact`
+1. **Unknown (74.01%)**
+   - Kept separate due to its dominant presence
+   - Cannot be reliably merged with other classes due to uncertainty
+   - Serves as background/negative class
 
-9. **Unknown:**
-    * `tissue_unknown`
+2. **Background/Artifact (4.29%)**
+   - Combined background (3.37%) and artifacts (0.92%)
+   - Merged due to similar semantic meaning (non-tissue elements)
+   - Creates more balanced representation of non-tissue elements
+
+3. **Inflammatory/Reactive (5.62%)**
+   - Combines inflammatory conditions (0.88%) with reactive changes (4.73%)
+   - Both represent tissue response to injury/stimuli
+   - Merging creates more substantial training representation
+   - Similar pathological mechanisms and appearance
+
+4. **Carcinoma (2.27%)**
+   - Groups all malignant and pre-malignant conditions
+   - Combines small but clinically crucial classes
+   - Includes related structural changes
+   - Ensures sufficient representation for critical diagnostic features
+
+5. **Normal Tissue (13.81%)**
+   - Combines all normal tissue types for better representation
+   - Second largest class provides strong baseline
+   - Includes surgical margins as they represent normal tissue
+   - Balances clinical need with statistical representation
+
+## 10-Class System Rationale
+
+The 10-class system provides finer granularity while maintaining reasonable class sizes:
+
+1. **Unknown (74.03%)**
+   - Maintained as largest class
+   - Essential for model's uncertainty handling
+
+2. **Background (3.37%)** & **Artifacts (0.92%)**
+   - Separated to distinguish processing artifacts from true background
+   - Important for quality control
+   - Combined represent 4.29% of pixels
+
+3. **Carcinoma (1.45%)**
+   - Pure malignant conditions
+   - Critical for diagnostic accuracy
+   - More focused than 5-class version
+
+4. **Normal Dermis (7.65%)** & **Normal Epidermis (0.60%)**
+   - Separated despite size difference
+   - Clinically distinct tissues
+   - Key for anatomical understanding
+
+5. **Normal Appendages (5.56%)**
+   - Combines smaller normal structures
+   - Creates meaningful intermediate-sized class
+   - Anatomically coherent grouping
+
+6. **Inflammatory (0.88%)** & **Reactive (4.73%)**
+   - Separated to distinguish acute from chronic changes
+   - Reactive class large enough to stand alone
+   - Important for disease progression understanding
+
+7. **Structural (0.80%)**
+   - New category for non-inflammatory changes
+   - Groups related but rare conditions
+   - Maintains clinical relevance despite small size
+
+### Key Distribution Considerations
+- Unknown class maintained as majority class in both systems
+- 5-class system ensures no non-unknown class falls below 2%
+- 10-class system accepts smaller classes (minimum 0.60%) for clinical relevance
+- Surgical margin variants consistently grouped with their parent tissue types
+- Balance between statistical representation and clinical meaning
 
