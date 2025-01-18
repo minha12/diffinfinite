@@ -7,7 +7,6 @@ models/
 download_script.py
 
 results/
-logs/
 mask-viz/
 models/
 changes.txt
