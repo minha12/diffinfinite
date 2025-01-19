@@ -54,7 +54,10 @@ The loss curve shows steady convergence over training steps, with notable observ
 - Latent Normalizing Scale: 0.18215 (Standard SD VAE scaling)
 - Total Training Time: ~12 hours
 - Hardware: 2x NVIDIA A100 80GB GPUs
+- Batch size: 128
 - Training Steps: 12,000
+- Training dataset size: 222075
+- Epoch: ~6.9 epoches
 
 ### Loss Analysis
 ![Training Loss Plot](loss_plot_drsk_512x256_5class_20240120_0805.png)
