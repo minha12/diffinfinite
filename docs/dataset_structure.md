@@ -1,5 +1,19 @@
 # Dataset Structure and Processing Flow
 
+## Dataset Statistics
+- Total image files: 246,750
+- Total mask files: 246,755 (5 orphaned masks identified)
+- Zero-value masks: 156,024 files (to be moved to unconditional data)
+- Files with meaningful masks: 90,726
+
+### Training/Testing Split (90/10)
+- Training set: ~222,075 images
+  - Conditional (with masks): ~81,653 images
+  - Unconditional (zero masks): ~140,422 images
+- Testing set: ~24,675 images
+  - Conditional (with masks): ~9,073 images
+  - Unconditional (zero masks): ~15,602 images
+
 ## Directory Structure
 ```bash
 /path/to/labeled/dataset/
@@ -13,7 +27,7 @@
 └── ... (additional image/mask pairs)
 
 /path/to/unconditional/dataset/
-├── image1.jpg
+├── image1.jpg # Images with zero-value masks
 ├── image2.jpg
 ├── image3.jpg
 └── ... (only .jpg files, no masks needed)
@@ -92,3 +106,9 @@ flowchart LR
 - cond_drop_prob: Controls mixing of conditional/unconditional samples
 - num_workers: Parallel loading threads
 - transform: Augmentation pipeline applied to both sources
+
+### Note on Zero-Value Masks
+- 156,024 files containing only background (label 0) were identified
+- These files are automatically moved to the unconditional data folder
+- This reorganization maintains dataset structure while optimizing storage
+- Zero-value mask files don't require mask storage in labeled dataset
