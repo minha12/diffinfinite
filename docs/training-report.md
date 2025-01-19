@@ -48,3 +48,44 @@ The loss curve shows steady convergence over training steps, with notable observ
     <img src="../logs/drsk_512x256_5class_20240119_1118/sample-50.png" width="30%">
 </div>
 
+## Training with SD VAE Latent Scaling (0.18215)
+
+### Training Configuration Updates
+- Latent Normalizing Scale: 0.18215 (Standard SD VAE scaling)
+- Total Training Time: ~12 hours
+- Hardware: 2x NVIDIA A100 80GB GPUs
+- Training Steps: 12,000
+
+### Loss Analysis
+![Training Loss Plot](loss_plot_drsk_512x256_5class_20240120_0805.png)
+
+### Sample Generation Progress
+
+### Step 2000
+<div style="display: flex; justify-content: space-between;">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/images-20.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/masks-20.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/sample-20.png" width="30%">
+</div>
+
+### Step 4000
+<div style="display: flex; justify-content: space-between;">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/images-40.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/masks-40.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/sample-40.png" width="30%">
+</div>
+
+### Step 8000
+<div style="display: flex; justify-content: space-between;">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/images-80.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/masks-80.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/sample-80.png" width="30%">
+</div>
+
+### Step 12000 (Final)
+<div style="display: flex; justify-content: space-between;">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/images-120.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/masks-120.png" width="30%">
+    <img src="../logs/drsk_512x256_5class_20240120_0805/sample-120.png" width="30%">
+</div>
+
