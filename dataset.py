@@ -35,21 +35,25 @@ class ComposeState(T.Compose):
     def __init__(self, transforms):
         self.transforms = []
         self.mask_transforms = []
-
+        
         for t in transforms:
+            # Add transform to main list
             self.transforms.append(t)
+            # Add to mask transforms if it's not normalization
+            if not isinstance(t, T.Normalize):
+                self.mask_transforms.append(t)
 
         self.seed = None
         self.retain_state = False
 
     def __call__(self, x):
-        if self.seed is not None:   # retain previous state
+        if self.seed is not None:
             set_global_seed(self.seed)
-        if self.retain_state:    # save state for next call
+        if self.retain_state:
             self.seed = self.seed or torch.seed()
             set_global_seed(self.seed)
         else:
-            self.seed = None    # reset / ignore state
+            self.seed = None
 
         if isinstance(x, (list, tuple)):
             return self.apply_sequence(x)
@@ -57,14 +61,20 @@ class ComposeState(T.Compose):
             return self.apply_img(x)
 
     def apply_img(self, img):
-        for t in self.transforms:
-            img = t(img)
+        # If it's an image, apply all transforms
+        if isinstance(img, Image.Image) and img.mode == 'RGB':
+            for t in self.transforms:
+                img = t(img)
+        # If it's a mask, only apply non-normalize transforms
+        else:
+            for t in self.mask_transforms:
+                img = t(img)
         return img
 
     def apply_sequence(self, seq):
-        self.retain_state=True
+        self.retain_state = True
         seq = list(map(self, seq))
-        self.retain_state=False
+        self.retain_state = False
         return seq
 
 
@@ -309,12 +319,6 @@ def import_dataset(
             T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
         ])
 
-    train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
-                            subclasses=subclasses, cond_drop_prob=cond_drop_prob,
-                            transform=transform,
-                            extra_unknown_data_path=[extra_data_path],
-                            debug=debug)
-
     test_transform = ComposeState([
             T.ToTensor(),
             T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),  # Add normalization
@@ -483,25 +487,21 @@ class DatasetLung(Dataset):
         img, mask = self.unbalanced_data()
 
         if self.transform is not None:
+            # Convert mask to single channel if needed
+            if isinstance(mask, Image.Image):
+                mask = mask.convert('L')
+            
             img, mask = self.transform((img, mask))
             mask = (mask * 255).int()
+            
+            # Debug logging
             if self.debug and idx == 0:
                 print("\n=== Transformed Image Details [DatasetLung.__getitem__()] ===")
                 print(f"Image tensor metadata:")
                 print(f"  Shape: {img.shape}")
-                print(f"  Dtype: {img.dtype}")
-                print(f"  Device: {img.device}")
                 print(f"  Value range: [{img.min():.2f}, {img.max():.2f}]")
-                print(f"  Mean: {img.mean():.2f}")
-                print(f"  Std: {img.std():.2f}")
                 print(f"\nMask tensor metadata:")
                 print(f"  Shape: {mask.shape}")
-                print(f"  Dtype: {mask.dtype}")
-                print(f"  Device: {mask.device}")
                 print(f"  Unique values: {torch.unique(mask).tolist()}")
-                print(f"  Value counts:")
-                unique, counts = torch.unique(mask, return_counts=True)
-                for val, count in zip(unique, counts):
-                    print(f"    {val}: {count}")
 
         return img, mask
