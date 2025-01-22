@@ -69,7 +69,7 @@ hale0007/diffinf:2.0.1 tail -f /dev/null
 
 2. Access the container:
 ```bash
-docker exec -it diffinf_container bash
+sudo docker exec -it diffinf_container bash
 ```
 
 3. Update certificates (required before any network operations):
@@ -81,13 +81,16 @@ update-ca-certificates
 4. Start training:
 ```bash
 cd /app/diffinfinite
+conda activate diffinf
+pip install tensorboard # in case this package is missing
+
 nohup accelerate launch --config_file config/accelerate_config.yaml train.py --config_file config/image_gen_train.yaml > logs/training_$(date +%Y%m%d_%H%M%S).log 2>&1 &
 ```
 
 5. Monitor training with Tensorboard:
 ```bash
 # Open a new terminal and access the container again
-docker exec -it diffinf_container bash
+sudo docker exec -it diffinf_container bash
 
 # Launch Tensorboard (replace with your specific log directory)
 tensorboard --logdir=/app/diffinfinite/logs/drsk_512x256_5class_20240122_15:09/tensorboard --host 0.0.0.0 --port 6006
@@ -99,15 +102,15 @@ Then access Tensorboard in your browser at `http://localhost:6006`
 Monitor and control your container:
 ```bash
 # Check container status
-docker ps  # List running containers
-docker logs diffinf_container  # View container logs
+sudo docker ps  # List running containers
+sudo docker logs diffinf_container  # View container logs
 
 # Monitor training progress
 tail -f /app/diffinfinite/logs/training_*.log  # Inside container
 
 # Container lifecycle
-docker stop diffinf_container   # Stop container
-docker start diffinf_container  # Restart container
+sudo docker stop diffinf_container   # Stop container
+sudo docker start diffinf_container  # Restart container
 ```
 
 ### 2. Local Installation
@@ -117,6 +120,7 @@ Create a conda environment using the requirements file.
 ```
 conda env create -n env_name -f environment.yaml
 conda activate env_name
+pip install requirements.txt
 ```
 
 Download and unzip the models (```n_classes``` can be 5 or 10):
