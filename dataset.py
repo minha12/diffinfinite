@@ -324,15 +324,22 @@ def import_dataset(
             T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),  # Add normalization
         ])
     
-    test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
+    # Create train and test datasets
+    train_dataset = DatasetLung(data_path=data_path, data_dict=train_dict,
+                            subclasses=subclasses, cond_drop_prob=cond_drop_prob,
+                            transform=transform,
+                            extra_unknown_data_path=[extra_data_path],
+                            debug=debug)
+    
+    test_dataset = DatasetLung(data_path=data_path, data_dict=test_dict, 
                            subclasses=subclasses, cond_drop_prob=1.0,
                            transform=test_transform,
                            extra_unknown_data_path=[extra_data_path],
-                           debug=debug)  # Pass debug flag
+                           debug=debug)
 
     # Create the train and test data loaders
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, num_workers=num_workers)
-    test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False, num_workers=num_workers)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True, num_workers=num_workers)
+    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     return train_loader, test_loader
 
