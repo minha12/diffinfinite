@@ -113,6 +113,45 @@ sudo docker stop diffinf_container   # Stop container
 sudo docker start diffinf_container  # Restart container
 ```
 
+### Remote Development on Verdi with VSCode
+
+To connect VSCode to Verdi for remote development:
+
+1. Configure SSH Control Master:
+```bash
+# Create control masters directory
+mkdir ~/.ssh/controlmasters
+
+# Add to ~/.ssh/config
+Host jumphost
+  HostName dsp.aida.scilifelab.se
+  User minh-ha.le@liu.se
+
+Host verdi-vm
+  ControlMaster auto
+  ControlPath ~/.ssh/controlmasters/%r@%h:%p
+  ControlPersist yes
+  ForwardAgent yes
+  HostName 10.253.16.130
+  User ubuntu
+  ProxyJump jumphost
+```
+
+2. Configure VSCode:
+   - Open VSCode Settings (JSON) and add:
+```json
+{
+    "remote.SSH.enableAgentForwarding": true,
+    "remote.SSH.showLoginTerminal": true,
+    "remote.SSH.useLocalServer": false
+}
+```
+
+3. Connect to Verdi:
+   - Press `F1` or `Cmd/Ctrl+Shift+P`
+   - Type "Remote-SSH: Connect to Host"
+   - Select `verdi-vm`
+
 ### 2. Local Installation
 
 Create a conda environment using the requirements file.
