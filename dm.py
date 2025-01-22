@@ -39,6 +39,8 @@ import io
 from torchvision.transforms import ToTensor
 from PIL import Image
 
+from torch.utils.tensorboard import SummaryWriter
+
 # Constants
 
 
@@ -746,6 +748,9 @@ class Trainer:
         self.scheduler = lr_scheduler.OneCycleLR(self.opt, max_lr=train_lr, total_steps=train_num_steps)
         self.model, self.opt, self.ema, self.scheduler = self.accelerator.prepare(self.model, self.opt, self.ema, self.scheduler)
 
+        # Add TensorBoard writer
+        self.writer = SummaryWriter(os.path.join(self.results_folder, 'tensorboard'))
+
     def save(self, milestone):
         if not self.accelerator.is_local_main_process:
             return
@@ -762,6 +767,10 @@ class Trainer:
         }
 
         torch.save(data, str(self.results_folder / f'model-{milestone}.pt'))
+
+        # Close TensorBoard writer before saving
+        if self.accelerator.is_local_main_process:
+            self.writer.flush()
 
     def load(self, milestone):
         data = torch.load(str(self.results_folder / f'model-{milestone}.pt'), map_location=self.accelerator.device)
@@ -827,6 +836,11 @@ class Trainer:
         self.opt.step()
         self.opt.zero_grad()
         self.scheduler.step()
+
+        # Log metrics to TensorBoard
+        if self.accelerator.is_local_main_process:
+            self.writer.add_scalar('Loss/train', loss.item(), self.step)
+            self.writer.add_scalar('Learning_rate', self.scheduler.get_lr()[0], self.step)
 
         return loss
     
@@ -937,6 +951,17 @@ class Trainer:
                         print(f"  Device: {test_samples.device}")
                         print(f"  Value range: [{test_samples.min():.2f}, {test_samples.max():.2f}]")
                     
+                    # Add sample images to TensorBoard
+                    self.writer.add_images('Generated_samples', test_samples, self.step)
+                    self.writer.add_images('Input_images', test_images_denorm, self.step)
+                    
+                    # Convert masks to RGB for visualization
+                    mask_rgb = torch.zeros((test_masks.size(0), 3, test_masks.size(2), test_masks.size(3)), 
+                                        device=test_masks.device)
+                    for i in range(self.model.num_classes):
+                        mask_rgb[:, i % 3] += (test_masks == i).float()
+                    self.writer.add_images('Masks', mask_rgb, self.step)
+                    
                     # Only save model checkpoint at milestone intervals
                     if self.step % self.save_milestone_every == 0:
                         self.save(milestone)
@@ -968,3 +993,7 @@ class Trainer:
                 pbar.update(1)
 
         self.accelerator.print('training complete')
+
+        # Close TensorBoard writer
+        if self.accelerator.is_local_main_process:
+            self.writer.close()
