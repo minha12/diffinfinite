@@ -845,60 +845,55 @@ class Trainer:
 
         return loss
     
-    def save_colored_masks(self, masks, save_path, nrow):  # Add self parameter
+    def save_colored_masks(self, masks, save_path, nrow):
         """Convert masks to colored visualization and save as image."""
-        # Define colors for different mask values (adjust colors as needed)
-        colors = {
-            0: '#FFFFFF',  # white
-            1: '#FFA500',  # orange
-            2: '#00FFFF',  # cyan
-            3: '#FF0000',  # red
-            4: '#008000'   # green
-        }
+        colors = ['#FFFFFF', '#FFA500', '#00FFFF', '#FF0000', '#008000']
+        cmap = ListedColormap(colors)
         
-        # Calculate grid dimensions
         n_samples = masks.shape[0]
         n_rows = int(math.sqrt(n_samples))
         n_cols = math.ceil(n_samples / n_rows)
         
-        # Create figure with subplots
         fig, axs = plt.subplots(n_rows, n_cols, figsize=(4*n_cols, 4*n_rows))
         if n_rows == 1 and n_cols == 1:
             axs = np.array([[axs]])
         elif n_rows == 1 or n_cols == 1:
             axs = axs.reshape(n_rows, n_cols)
         
-        # Plot each mask
         for idx in range(n_samples):
             row = idx // n_cols
             col = idx % n_cols
-            
-            # Create colormap from unique values in mask
-            unique_values = torch.unique(masks[idx])
-            cmap = ListedColormap([colors[val.item()] for val in unique_values])
-            
-            # Plot mask
             axs[row, col].imshow(masks[idx, 0].cpu().detach(), cmap=cmap)
             axs[row, col].axis('off')
         
-        # Remove empty subplots
         for idx in range(n_samples, n_rows * n_cols):
             row = idx // n_cols
             col = idx % n_cols
-            try:
-                fig.delaxes(axs[row, col])
-            except:
-                pass
+            fig.delaxes(axs[row, col])
         
-        # Save plot to file
         plt.tight_layout()
         plt.savefig(save_path)
         plt.close()
 
+    def create_colored_mask_tensor(self, masks, device):
+        """Convert masks to RGB tensor using predefined color scheme."""
+        colors = ['#FFFFFF', '#FFA500', '#00FFFF', '#FF0000', '#008000']
+        hex_to_rgb = lambda h: tuple(int(h.lstrip('#')[i:i+2], 16)/255 for i in (0, 2, 4))
+        rgb_colors = [hex_to_rgb(c) for c in colors]
+        
+        mask_rgb = torch.zeros((masks.size(0), 3, masks.size(2), masks.size(3)), device=device)
+        
+        for i, (r, g, b) in enumerate(rgb_colors):
+            mask = (masks == i).float()
+            mask_rgb[:, 0] += mask[:, 0] * r  # Red channel
+            mask_rgb[:, 1] += mask[:, 0] * g  # Green channel
+            mask_rgb[:, 2] += mask[:, 0] * b  # Blue channel
+        
+        return mask_rgb
+
     def eval_loop(self):
         if self.accelerator.is_main_process:
             # Get unwrapped models
-            
             unwrapped_ema = self.accelerator.unwrap_model(self.ema)
             unwrapped_model = self.accelerator.unwrap_model(self.model)
             
@@ -953,15 +948,12 @@ class Trainer:
                         print(f"  Device: {test_samples.device}")
                         print(f"  Value range: [{test_samples.min():.2f}, {test_samples.max():.2f}]")
                     
-                    # Add sample images to TensorBoard
+                     # Convert masks to RGB for visualization using the same colors as save_colored_masks
+                    mask_rgb = self.create_colored_mask_tensor(test_masks, test_masks.device)
+                    
+                    # Add images to TensorBoard
                     self.writer.add_images('Generated_samples', test_samples, self.step)
                     self.writer.add_images('Input_images', test_images_denorm, self.step)
-                    
-                    # Convert masks to RGB for visualization - use unwrapped_model to access num_classes
-                    mask_rgb = torch.zeros((test_masks.size(0), 3, test_masks.size(2), test_masks.size(3)), 
-                                        device=test_masks.device)
-                    for i in range(unwrapped_model.num_classes):
-                        mask_rgb[:, i % 3] += (test_masks == i).float()
                     self.writer.add_images('Masks', mask_rgb, self.step)
                     
                     # Only save model checkpoint at milestone intervals
