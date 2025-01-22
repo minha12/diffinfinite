@@ -59,3 +59,4 @@ setuptools==69.5.1     # Explicit version for builds
 # Web Data Parsing (HTML/XML)
 beautifulsoup4==4.12.3
 lxml==5.2.1
+tensorboard
