@@ -665,7 +665,7 @@ class Trainer:
         out_size=None,
         config_file = None,
         extra_data_path = None,
-        norm_scale = 1/50, # Standard SD scaling 0.18215 or 1/50
+        norm_scale = 0.18215, # Standard SD scaling 0.18215 or 1/50
         debug = False,  # Add debug parameter
     ):
         super().__init__()
