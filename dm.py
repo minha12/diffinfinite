@@ -897,13 +897,17 @@ class Trainer:
                     milestone = self.step // self.save_and_sample_every
                     test_images, test_masks = next(self.test_loader)
                     
+                    # Denormalize the test images before saving
+                    test_images_denorm = test_images * 0.5 + 0.5  # Denormalize from [-1,1] to [0,1]
+                    
                     # Unwrap VAE model as before
                     vae = self.accelerator.unwrap_model(self.vae)
                     z = vae.encode(test_images[:self.num_samples]).latent_dist.sample() * self.norm_scale # correct scale
                     z = unwrapped_ema.ema_model.sample(z, test_masks[:self.num_samples]) / self.norm_scale  # correct scale  
-                    test_samples = torch.clip(vae.decode(z).sample, 0, 1)
+                    test_samples = torch.clip(vae.decode(z).sample, -1, 1)  # Clip to [-1,1] range
+                    test_samples = test_samples * 0.5 + 0.5  # Denormalize to [0,1] range
                     
-                    utils.save_image(test_images[:self.num_samples], 
+                    utils.save_image(test_images_denorm[:self.num_samples], 
                                  str(self.results_folder / f'images-{milestone}.png'), 
                                  nrow = int(math.sqrt(self.num_samples)))   
                     
