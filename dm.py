@@ -900,6 +900,7 @@ class Trainer:
             # Get unwrapped models
             
             unwrapped_ema = self.accelerator.unwrap_model(self.ema)
+            unwrapped_model = self.accelerator.unwrap_model(self.model)
             
             unwrapped_ema.to(self.accelerator.device)
             unwrapped_ema.update()
@@ -956,10 +957,10 @@ class Trainer:
                     self.writer.add_images('Generated_samples', test_samples, self.step)
                     self.writer.add_images('Input_images', test_images_denorm, self.step)
                     
-                    # Convert masks to RGB for visualization
+                    # Convert masks to RGB for visualization - use unwrapped_model to access num_classes
                     mask_rgb = torch.zeros((test_masks.size(0), 3, test_masks.size(2), test_masks.size(3)), 
                                         device=test_masks.device)
-                    for i in range(self.model.num_classes):
+                    for i in range(unwrapped_model.num_classes):
                         mask_rgb[:, i % 3] += (test_masks == i).float()
                     self.writer.add_images('Masks', mask_rgb, self.step)
                     
