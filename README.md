@@ -1,21 +1,116 @@
 # DiffInfinite 
 
-We present DiffInfinite, a hierarchical diffusion model that generates arbitrarily large histological images while preserving long-range correlation structural information. Our approach first generates synthetic segmentation masks, subsequently used as conditions for the high-fidelity generative diffusion process. The proposed sampling method can be scaled up to any desired image size while only requiring small patches for fast training. Moreover, it can be parallelized more efficiently than previous large-content generation methods while avoiding tiling artefacts. The training leverages classifier-free guidance to augment a small, sparsely annotated dataset with unlabelled data. Our method alleviates unique challenges in histopathological imaging practice: large-scale information, costly manual annotation, and protective data handling. The biological plausibility of DiffInfinite data is validated in a survey by ten experienced pathologists as well as a downstream segmentation task. Furthermore, the model scores strongly on anti-copying metrics which is beneficial for the protection of patient data.
+## Installation Options
 
-Check out some examples on the [Project Website](https://marcoaversa.github.io/diffinfinite/).
+### 1. Using Docker (Recommended)
 
-![Example Image](images/examples/synth_examples.png)
+The Docker build process is organized in multiple stages to optimize build time and caching:
 
-Click on the link below to run the Jupyter Notebook on Google Colab (set ```colab=True``` in the first cell):
+1. `base`: NVIDIA CUDA base image with system dependencies
+2. `conda-install`: Installs Miniforge (minimal Conda)
+3. `conda-env`: Creates Conda environment from environment.yaml
+4. `final`: Installs additional pip requirements
+5. `ultimate`: Installs extra dependencies and downloads SD model
 
-<a target="_blank" href="https://colab.research.google.com/github/diffinfinite/diffinfinite/blob/master/main.ipynb">
+Build the image using:
 
-  <img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/>
+```bash
+cd ~/diffinfinite
 
-</a>
+# Build intermediate stage (conda environment)
+docker build --target conda-env . -t diffinf:conda-env
 
+# Build final image using cache from previous stage
+docker build --cache-from diffinf:conda-env --target ultimate . -t diffinf:latest
+```
 
-## Run Locally
+The image includes:
+- CUDA 11.8 with cuDNN 8
+- Python environment from environment.yaml
+- Pre-downloaded Stable Diffusion model
+- All required ML libraries and dependencies
+
+To push to Docker Hub:
+```bash
+docker login
+
+# Tag with version
+docker tag diffinf:latest hale0007/diffinf:2.0.1
+
+# Push to registry
+docker push hale0007/diffinf:2.0.1
+```
+
+To pull and use the pre-built image:
+```bash
+docker pull hale0007/diffinf:2.0.1
+
+# Run with GPU support
+docker run --gpus all -it hale0007/diffinf:2.0.1
+
+# For development (mount current directory)
+docker run --gpus all -v $(pwd):/app -it hale0007/diffinf:2.0.1
+```
+
+#### Running on Verdi System
+
+1. Launch container in detached mode:
+```bash
+sudo docker run -d --gpus all --shm-size=240g -p 6006:6006 --name diffinf_container \
+-v "$(pwd)/diffinfinite:/app/diffinfinite" \
+-v /usr/local/share/ca-certificates/verdi.crt:/usr/local/share/ca-certificates/verdi.crt \
+-e HTTP_PROXY=https://10.253.254.250:3130/ \
+-e HTTPS_PROXY=https://10.253.254.250:3130/ \
+-e http_proxy=https://10.253.254.250:3130/ \
+-e https_proxy=https://10.253.254.250:3130/ \
+-e REQUESTS_CA_BUNDLE=/usr/local/share/ca-certificates/verdi.crt \
+hale0007/diffinf:2.0.1 tail -f /dev/null
+```
+
+2. Access the container:
+```bash
+docker exec -it diffinf_container bash
+```
+
+3. Update certificates (required before any network operations):
+```bash
+chmod 644 /usr/local/share/ca-certificates/verdi.crt
+update-ca-certificates
+```
+
+4. Start training:
+```bash
+cd /app/diffinfinite
+nohup accelerate launch --config_file config/accelerate_config.yaml train.py --config_file config/image_gen_train.yaml > logs/training_$(date +%Y%m%d_%H%M%S).log 2>&1 &
+```
+
+5. Monitor training with Tensorboard:
+```bash
+# Open a new terminal and access the container again
+docker exec -it diffinf_container bash
+
+# Launch Tensorboard (replace with your specific log directory)
+tensorboard --logdir=/app/diffinfinite/logs/drsk_512x256_5class_20240122_15:09/tensorboard --host 0.0.0.0 --port 6006
+```
+Then access Tensorboard in your browser at `http://localhost:6006`
+
+#### Container Management
+
+Monitor and control your container:
+```bash
+# Check container status
+docker ps  # List running containers
+docker logs diffinf_container  # View container logs
+
+# Monitor training progress
+tail -f /app/diffinfinite/logs/training_*.log  # Inside container
+
+# Container lifecycle
+docker stop diffinf_container   # Stop container
+docker start diffinf_container  # Restart container
+```
+
+### 2. Local Installation
 
 Create a conda environment using the requirements file.
 
@@ -40,46 +135,3 @@ In ```./results```, we share some synthetic data generated with the model.
 In ```./results/large``` we show 2048x2048 images for different ω.
 
 In ```./results/patches``` we show 512x512 images for different ω.
-
-## Evaluation Metrics
-
-Save your generated data and your real data as ```.png``` in ```generated_dir``` and ```real_dir``` respectively.
-To calculate the [Fréchet Inception Distance](https://arxiv.org/abs/1706.08500) and the [Inception Score](https://arxiv.org/pdf/1606.03498.pdf) use the [torch-fidelity](https://github.com/toshas/torch-fidelity) package and run
-
-```
-fidelity --gpu 0 --isc --input1 generated_dir
-fidelity --gpu 0 --fid --input1 generated_dir --input2 real_dir
-```
-
-For [Improved Precision and Improved Recall](https://arxiv.org/abs/1904.06991), clone the repository [improved-precision-and-recall-metric-pytorch](https://github.com/blandocs/improved-precision-and-recall-metric-pytorch) and run
-
-```
-python main.py --cal_type precision_and_recall --generated_dir generated_dir --real_dir real_dir
-```
-
-To evaluate your generated data wrt. the [Authenticity](https://arxiv.org/abs/2102.08921) and the $C_{T}$ [score](https://arxiv.org/abs/2004.05675), clone the repository [fls](https://github.com/marcojira/fls) by
-
-```
-cd diffinfinite
-git clone https://github.com/marcojira/fls.git
-pip install git+https://github.com/openai/CLIP.git
-```
-
-and run 
-
-```
-python eval_privacy.py --train_dir train_dir --test_dir test_dir --generated_dir generated_dir 
-```
-
-## Citations
-
-```
-@inproceedings{
-aversa2023diffinfinite,
-title={DiffInfinite: Large Mask-Image Synthesis via Parallel Random Patch Diffusion in Histopathology},
-author={Marco Aversa and Gabriel Nobis and Miriam H{\"a}gele and Kai Standvoss and Mihaela Chirica and Roderick Murray-Smith and Ahmed Alaa and Lukas Ruff and Daniela Ivanova and Wojciech Samek and Frederick Klauschen and Bruno Sanguinetti and Luis Oala},
-booktitle={Thirty-seventh Conference on Neural Information Processing Systems Datasets and Benchmarks Track},
-year={2023},
-url={https://openreview.net/forum?id=QXTjde8evS}
-}
-```
