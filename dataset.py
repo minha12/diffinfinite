@@ -299,15 +299,27 @@ def import_dataset(
 
     train_dict, test_dict = split_dataset(data_path, train_size=0.9, config_file=config_file, debug=debug)
 
-    # Create the train and test datasets
+    # If no custom transform is provided, use default transform with normalization
+    if transform is None:
+        transform = ComposeState([
+            T.ToTensor(),
+            T.RandomHorizontalFlip(),
+            T.RandomVerticalFlip(),
+            RandomRotate90(),
+            T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+        ])
+
     train_set = DatasetLung(data_path=data_path, data_dict=train_dict, 
                             subclasses=subclasses, cond_drop_prob=cond_drop_prob,
                             transform=transform,
                             extra_unknown_data_path=[extra_data_path],
-                            debug=debug)  # Pass debug flag
+                            debug=debug)
+
     test_transform = ComposeState([
-            T.ToTensor(),  # Only convert to tensor, no augmentations
+            T.ToTensor(),
+            T.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),  # Add normalization
         ])
+    
     test_set = DatasetLung(data_path=data_path, data_dict=test_dict, 
                            subclasses=subclasses, cond_drop_prob=1.0,
                            transform=test_transform,
